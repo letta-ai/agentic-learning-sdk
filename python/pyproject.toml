@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentic-learning"
+version = "0.1.0"
+description = "Drop-in SDK for adding persistent memory and learning to any agent."
+readme = "../README.md"
+requires-python = ">=3.8"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Caren Thomas", email = "caren@letta.com"}
+]
+dependencies = [
+    "httpx>=0.21.2",
+    "httpx-sse>=0.4.0",
+    "pydantic>=1.9.2",
+    "pydantic-core>=2.18.2",
+    "typing_extensions>=4.0.0",
+    "letta_client==1.0.0a5",
+]
+
+# Optional dependencies for different providers
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.64.0"]
+openai = ["openai>=1.102.0"]
+gemini = ["google-generativeai>=0.8.0"]
+claude = ["claude-agent-sdk>=0.1.0"]
+all = [
+    "anthropic>=0.64.0",
+    "openai>=1.102.0",
+    "google-generativeai>=0.8.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/letta-ai/agentic-learning-sdk"
+Repository = "https://github.com/letta-ai/agentic-learning-sdk"
+Issues = "https://github.com/letta-ai/agentic-learning-sdk/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentic_learning"]
