@@ -1,5 +1,5 @@
 {
-  "name": "@letta/agentic-learning",
+  "name": "@letta-ai/agentic-learning",
   "version": "0.1.0",
   "description": "Agentic Learning SDK for TypeScript - Automatic memory integration with Letta",
   "main": "./dist/index.js",

@@ -5,13 +5,13 @@ Automatic memory integration with Letta for TypeScript/JavaScript LLM applicatio
 ## Installation
 
 ```bash
-npm install @letta/agentic-learning
+npm install @letta-ai/agentic-learning
 ```
 
 ## Quick Start
 
 ```typescript
-import { AgenticLearning, learning, autoInstall } from '@letta/agentic-learning';
+import { AgenticLearning, learning, autoInstall } from '@letta-ai/agentic-learning';
 import OpenAI from 'openai';
 
 // Install interceptors
