@@ -4,6 +4,6 @@ Agent Management
 Provides agent and sleeptime management operations.
 """
 
-from .client import AgentClient, AsyncAgentClient
+from .client import AgentsClient, AsyncAgentsClient
 
-__all__ = ["AgentClient", "AsyncAgentClient"]
+__all__ = ["AgentsClient", "AsyncAgentsClient"]

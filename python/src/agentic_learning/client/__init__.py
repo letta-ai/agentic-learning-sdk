@@ -7,7 +7,7 @@ High-level client interfaces for interacting with Letta agents.
 import os
 from typing import Optional
 
-from .agents import AgentClient, AsyncAgentClient
+from .agents import AgentsClient, AsyncAgentsClient
 from .memory import MemoryClient, AsyncMemoryClient
 from .messages import MessagesClient, AsyncMessagesClient
 
@@ -39,7 +39,7 @@ class AgenticLearning:
             base_url=self.base_url,
         )
 
-        self.agents = AgentClient(self, self._letta)
+        self.agents = AgentsClient(self, self._letta)
         self.memory = MemoryClient(self, self._letta)
         self.messages = MessagesClient(self, self._letta)
 
@@ -76,7 +76,7 @@ class AsyncAgenticLearning:
             base_url=self.base_url,
         )
 
-        self.agents = AsyncAgentClient(self, self._letta)
+        self.agents = AsyncAgentsClient(self, self._letta)
         self.memory = AsyncMemoryClient(self, self._letta)
         self.messages = AsyncMessagesClient(self, self._letta)
 

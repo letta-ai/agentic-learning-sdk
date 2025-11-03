@@ -16,7 +16,7 @@ from ..utils import memory_placeholder
 # =============================================================================
 
 
-class AgentClient:
+class AgentsClient:
     """
     Synchronous agent management client.
 
@@ -158,7 +158,7 @@ class AgentClient:
 # =============================================================================
 
 
-class AsyncAgentClient:
+class AsyncAgentsClient:
     """
     Asynchronous agent management client.
 
