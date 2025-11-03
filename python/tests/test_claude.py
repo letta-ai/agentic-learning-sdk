@@ -3,7 +3,6 @@
 import pytest
 import time
 from unittest.mock import Mock
-from agentic_learning.interceptors import auto_install
 from agentic_learning import learning
 
 
@@ -29,8 +28,6 @@ def mock_llm_client(mock_llm_response):
         from claude_agent_sdk._internal.transport.subprocess_cli import SubprocessCLITransport
     except ImportError:
         pytest.skip("Claude Agent SDK not available")
-
-    auto_install()
 
     # Store original methods
     original_init = SubprocessCLITransport.__init__
@@ -58,9 +55,6 @@ def mock_llm_client(mock_llm_response):
     SubprocessCLITransport.__init__ = mock_init
     SubprocessCLITransport.write = mock_write
     SubprocessCLITransport.read_messages = mock_read_messages
-
-    # Re-install interceptors to wrap mocks
-    auto_install()
 
     yield ClaudeSDKClient
 

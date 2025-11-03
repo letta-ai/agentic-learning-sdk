@@ -3,7 +3,6 @@
 import pytest
 from unittest.mock import Mock
 from openai import OpenAI
-from agentic_learning.interceptors import auto_install
 from .base_interceptor_tests import BaseInterceptorTests
 
 
@@ -27,7 +26,6 @@ def mock_llm_client(mock_llm_response):
     except (ImportError, AttributeError):
         pytest.skip("Responses API not available in this OpenAI SDK version")
 
-    auto_install()
     original_create = Responses.create
 
     def mock_create(self_arg, **kwargs):
@@ -36,7 +34,6 @@ def mock_llm_client(mock_llm_response):
         return mock_llm_response
 
     Responses.create = mock_create
-    auto_install()
 
     yield OpenAI(api_key="fake-key")
 

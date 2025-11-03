@@ -18,7 +18,6 @@ import sys
 import time
 import google.generativeai as genai
 from agentic_learning import learning, AgenticLearning
-from agentic_learning.interceptors import auto_install
 from utils import print_u, print_a, print_g, print_r, print_messages
 
 # Configure Gemini
@@ -29,11 +28,6 @@ if not api_key:
     sys.exit(1)
 
 genai.configure(api_key=api_key)
-
-# Install interceptors (this enables automatic memory integration)
-installed = auto_install()
-print(f"Installed interceptors: {installed}")
-print()
 
 # Create shared client for all examples
 learning_client = AgenticLearning(base_url="http://localhost:8283")

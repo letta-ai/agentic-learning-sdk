@@ -6,7 +6,7 @@
 
 export { BaseAPIInterceptor } from './base';
 export type { Provider, IBaseInterceptor } from './base';
-export { autoInstall, registerInterceptor, uninstallAll } from './registry';
+export { install, registerInterceptor, uninstallAll } from './registry';
 export { OpenAIInterceptor } from './openai';
 export { AnthropicInterceptor } from './anthropic';
 export { GeminiInterceptor } from './gemini';

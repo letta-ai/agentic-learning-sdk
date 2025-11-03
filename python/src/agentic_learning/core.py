@@ -16,10 +16,31 @@ if TYPE_CHECKING:
 
 _LEARNING_CONFIG: ContextVar[Optional[dict]] = ContextVar('learning_config', default=None)
 
+# Track whether interceptors have been installed
+_INTERCEPTORS_INSTALLED = False
+
 
 def get_current_config() -> Optional[dict]:
     """Get the current active learning configuration (context-local)."""
     return _LEARNING_CONFIG.get()
+
+
+def _ensure_interceptors_installed():
+    """
+    Ensure SDK interceptors are installed (one-time setup).
+
+    This auto-detects available SDKs and installs interceptors for them.
+    Only runs once per process.
+    """
+    global _INTERCEPTORS_INSTALLED
+
+    if _INTERCEPTORS_INSTALLED:
+        return
+
+    from .interceptors import install
+    install()
+
+    _INTERCEPTORS_INSTALLED = True
 
 
 # =============================================================================
@@ -51,6 +72,9 @@ class LearningContext:
 
     def __enter__(self):
         """Enter the learning context."""
+        # Install interceptors on first use (auto-detect available SDKs)
+        _ensure_interceptors_installed()
+
         self._token = _LEARNING_CONFIG.set({
             "agent_name": self.agent_name,
             "client": self.client,
@@ -59,9 +83,6 @@ class LearningContext:
             "model": self.model,
             "pending_user_message": None  # Buffer for batching messages
         })
-
-        # TODO: Install interceptors on first use (auto-detect available SDKs)
-        # _ensure_interceptors_installed()
 
         return self
 
@@ -149,6 +170,9 @@ class AsyncLearningContext:
 
     async def __aenter__(self):
         """Enter the learning context."""
+        # Install interceptors on first use (auto-detect available SDKs)
+        _ensure_interceptors_installed()
+
         self._token = _LEARNING_CONFIG.set({
             "agent_name": self.agent_name,
             "client": self.client,
@@ -157,9 +181,6 @@ class AsyncLearningContext:
             "model": self.model,
             "pending_user_message": None  # Buffer for batching messages
         })
-
-        # TODO: Install interceptors on first use (auto-detect available SDKs)
-        # _ensure_interceptors_installed()
 
         return self
 

@@ -4,7 +4,6 @@ import pytest
 from unittest.mock import Mock
 from openai import OpenAI
 from openai.resources.chat.completions import Completions
-from agentic_learning.interceptors import auto_install
 from .base_interceptor_tests import BaseInterceptorTests
 
 
@@ -23,7 +22,6 @@ def mock_llm_response():
 @pytest.fixture
 def mock_llm_client(mock_llm_response):
     """OpenAI client with mocked API."""
-    auto_install()
     original_create = Completions.create
 
     def mock_create(self_arg, **kwargs):
@@ -32,7 +30,6 @@ def mock_llm_client(mock_llm_response):
         return mock_llm_response
 
     Completions.create = mock_create
-    auto_install()
 
     yield OpenAI(api_key="fake-key")
 

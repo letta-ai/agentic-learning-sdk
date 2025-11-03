@@ -12,7 +12,7 @@ export type { AgenticLearningOptions } from './client';
 export { learning, withLearning, getCurrentConfig, saveConversationTurn } from './core';
 
 // Export interceptors (this also triggers registration via side effects)
-export { autoInstall, registerInterceptor, uninstallAll } from './interceptors';
+export { install, registerInterceptor, uninstallAll } from './interceptors';
 export { BaseAPIInterceptor } from './interceptors';
 export type { Provider, IBaseInterceptor } from './interceptors';
 
@@ -37,6 +37,6 @@ export function enableAnthropicInterception(client: any): void {
   if ((global as any).__ANTHROPIC_INTERCEPTOR__) {
     (global as any).__ANTHROPIC_INTERCEPTOR__.lazyInstall(client);
   } else {
-    console.warn('[AgenticLearning] Anthropic interceptor not found. Make sure to call autoInstall() first.');
+    console.warn('[AgenticLearning] Anthropic interceptor not found. Make sure to call install() first.');
   }
 }

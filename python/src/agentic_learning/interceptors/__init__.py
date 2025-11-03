@@ -9,7 +9,7 @@ from .gemini import GeminiInterceptor
 from .claude import ClaudeInterceptor
 from .anthropic import AnthropicInterceptor
 from .openai import OpenAIInterceptor
-from .registry import auto_install, register_interceptor, uninstall_all
+from .registry import install, register_interceptor, uninstall_all
 
 # Register available interceptors
 register_interceptor(GeminiInterceptor)
@@ -25,7 +25,7 @@ __all__ = [
     "ClaudeInterceptor",
     "AnthropicInterceptor",
     "OpenAIInterceptor",
-    "auto_install",
+    "install",
     "register_interceptor",
     "uninstall_all",
 ]

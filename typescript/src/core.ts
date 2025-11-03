@@ -72,8 +72,8 @@ export function learning(options: {
 } {
   // Auto-install interceptors on first use
   if (!interceptorsInstalled) {
-    const { autoInstall } = require('./interceptors');
-    autoInstall();
+    const { install } = require('./interceptors');
+    install();
     interceptorsInstalled = true;
   }
 
@@ -137,8 +137,8 @@ export async function withLearning<T>(
 ): Promise<T> {
   // Auto-install interceptors on first use
   if (!interceptorsInstalled) {
-    const { autoInstall } = require('./interceptors');
-    autoInstall();
+    const { install } = require('./interceptors');
+    install();
     interceptorsInstalled = true;
   }
 

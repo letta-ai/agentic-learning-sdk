@@ -19,7 +19,6 @@ import time
 import asyncio
 from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, AssistantMessage, TextBlock
 from agentic_learning import learning_async, AgenticLearning
-from agentic_learning.interceptors import auto_install
 from utils import print_u, print_a, print_g, print_r, print_messages
 
 # Configure Claude
@@ -28,11 +27,6 @@ if not api_key:
     print("Error: ANTHROPIC_API_KEY environment variable not set")
     print("Please run: export ANTHROPIC_API_KEY='your-api-key'")
     sys.exit(1)
-
-# Install interceptors (this enables automatic memory integration)
-installed = auto_install()
-print(f"Installed interceptors: {installed}")
-print()
 
 # Create sync client for memory injection (works with async contexts)
 learning_client = AgenticLearning(base_url="http://localhost:8283")

@@ -31,7 +31,7 @@ export function registerInterceptor(
  *
  * @returns List of installed interceptor provider names
  */
-export function autoInstall(): string[] {
+export function install(): string[] {
   const installed: string[] = [];
 
   for (const InterceptorClass of interceptorClasses) {

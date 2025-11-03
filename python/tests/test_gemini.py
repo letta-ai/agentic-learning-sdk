@@ -3,7 +3,6 @@
 import pytest
 from unittest.mock import Mock
 import google.generativeai as genai
-from agentic_learning.interceptors import auto_install
 from .base_interceptor_tests import BaseInterceptorTests
 
 
@@ -25,7 +24,6 @@ def mock_llm_response():
 @pytest.fixture
 def mock_llm_client(mock_llm_response):
     """Gemini client with mocked API."""
-    auto_install()
     genai.configure(api_key="fake-key")
 
     original_generate = genai.GenerativeModel.generate_content
@@ -39,7 +37,6 @@ def mock_llm_client(mock_llm_response):
         return mock_llm_response
 
     genai.GenerativeModel.generate_content = mock_generate
-    auto_install()
 
     # Create model and ensure it has a proper model_name attribute
     model = genai.GenerativeModel('models/gemini-2.5-flash')

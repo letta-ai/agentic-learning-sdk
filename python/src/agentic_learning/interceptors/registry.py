@@ -27,7 +27,7 @@ def register_interceptor(interceptor_class: Type[BaseInterceptor]):
         _INTERCEPTOR_CLASSES.append(interceptor_class)
 
 
-def auto_install() -> List[str]:
+def install() -> List[str]:
     """
     Auto-detect and install available SDK interceptors.
 

@@ -18,7 +18,6 @@ import os
 import sys
 from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, AssistantMessage, TextBlock
 from agentic_learning import learning_async, AgenticLearning
-from agentic_learning.interceptors import auto_install
 
 
 class InteractiveSession:
@@ -122,10 +121,6 @@ async def main():
         print("❌ Error: ANTHROPIC_API_KEY environment variable not set")
         print("Please run: export ANTHROPIC_API_KEY='your-api-key'")
         sys.exit(1)
-
-    # Install interceptors
-    installed = auto_install()
-    print(f"Installed interceptors: {installed}")
 
     # Initialize learning client
     learning_client = AgenticLearning(base_url="http://localhost:8283")

@@ -4,7 +4,6 @@ import pytest
 from unittest.mock import Mock
 from anthropic import Anthropic
 from anthropic.resources.messages import Messages
-from agentic_learning.interceptors import auto_install
 from .base_interceptor_tests import BaseInterceptorTests
 
 
@@ -24,7 +23,6 @@ def mock_llm_response():
 @pytest.fixture
 def mock_llm_client(mock_llm_response):
     """Anthropic client with mocked API."""
-    auto_install()
     original_create = Messages.create
 
     def mock_create(self_arg, **kwargs):
@@ -33,7 +31,6 @@ def mock_llm_client(mock_llm_response):
         return mock_llm_response
 
     Messages.create = mock_create
-    auto_install()
 
     yield Anthropic(api_key="fake-key")
 
