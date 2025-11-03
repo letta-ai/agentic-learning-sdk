@@ -34,15 +34,26 @@ export async function saveConversationTurn(
   }
 
   try {
+    if (process.env.DEBUG_AGENTIC_LEARNING) {
+      console.log('[AgenticLearning] Saving conversation turn for agent:', agent);
+    }
+
     // Get or create agent
     let agentState = await client.agents.retrieve(agent);
 
     if (!agentState) {
+      if (process.env.DEBUG_AGENTIC_LEARNING) {
+        console.log('[AgenticLearning] Agent not found, creating new agent');
+      }
       agentState = await client.agents.create({
         agent,
         memory: config.memory,
         model: config.model,
       });
+    }
+
+    if (process.env.DEBUG_AGENTIC_LEARNING) {
+      console.log('[AgenticLearning] Capturing messages to Letta');
     }
 
     // Use messages.capture method
@@ -52,10 +63,14 @@ export async function saveConversationTurn(
       responseDict,
       model,
     });
+
+    if (process.env.DEBUG_AGENTIC_LEARNING) {
+      console.log('[AgenticLearning] ✓ Conversation saved successfully');
+    }
   } catch (error) {
     // Silently fail - don't crash the application
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[AgenticLearning] Failed to save conversation:', error);
+    if (process.env.DEBUG_AGENTIC_LEARNING || process.env.NODE_ENV === 'development') {
+      console.error('[AgenticLearning] Failed to save conversation:', error);
     }
   }
 }

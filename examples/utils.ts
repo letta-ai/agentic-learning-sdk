@@ -53,12 +53,20 @@ export function printR(message: string, end: string = '\n'): void {
 export function printMessages(messages: Message[]): void {
   console.log('[printMessages] messages:', messages);
   for (const message of messages) {
-    if (message.messageType === 'user_message' && typeof message.content === 'string') {
+    if (message.message_type === 'user_message' && typeof message.content === 'string') {
       printU(message.content);
-    } else if (message.messageType === 'assistant_message' && typeof message.content === 'string') {
+    } else if (message.message_type === 'assistant_message' && typeof message.content === 'string') {
       printA(message.content);
-    } else if (message.messageType === 'reasoning_message' && message.reasoning) {
+    } else if (message.message_type === 'reasoning_message' && message.reasoning) {
       printA(message.reasoning);
     }
   }
+}
+
+
+/**
+ * Helper function to sleep
+ */
+export function sleep(s: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, s * 1000));
 }

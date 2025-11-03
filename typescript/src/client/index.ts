@@ -4,7 +4,7 @@
  * Wrapper around Letta client providing simplified memory and agent management APIs.
  */
 
-import { LettaClient } from '@letta-ai/letta-client';
+import Letta from '@letta-ai/letta-client';
 import { AgentsClient } from './agents/client';
 import { MemoryClient } from './memory/client';
 import { MessagesClient } from './messages/client';
@@ -22,7 +22,7 @@ export interface AgenticLearningOptions {
  * Provides simplified APIs for managing Letta agents with name-based lookups.
  */
 export class AgenticLearning {
-  public readonly letta: LettaClient;
+  public readonly letta: Letta;
   public readonly baseUrl: string;
 
   public readonly agents: AgentsClient;
@@ -44,10 +44,10 @@ export class AgenticLearning {
     this.baseUrl = options.baseUrl || process.env.LETTA_BASE_URL || 'https://api.letta.com';
 
     // Create underlying Letta client
-    this.letta = new LettaClient({
-      baseUrl: this.baseUrl,
-      token: apiKey,
-      project: 'default-project',
+    this.letta = new Letta({
+      baseURL: this.baseUrl,
+      apiKey: apiKey || undefined,
+      projectID: 'default-project',
     });
 
     // Initialize sub-clients

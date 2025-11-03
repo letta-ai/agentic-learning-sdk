@@ -34,18 +34,42 @@ export function registerInterceptor(
 export function install(): string[] {
   const installed: string[] = [];
 
+  if (process.env.DEBUG_AGENTIC_LEARNING) {
+    console.log('[AgenticLearning] Installing interceptors...');
+    console.log('[AgenticLearning] Registered interceptor classes:', interceptorClasses.length);
+  }
+
   for (const InterceptorClass of interceptorClasses) {
     const interceptor = new InterceptorClass();
+
+    if (process.env.DEBUG_AGENTIC_LEARNING) {
+      console.log(`[AgenticLearning] Checking ${interceptor.PROVIDER}...`);
+    }
 
     if (interceptor.isAvailable()) {
       try {
         interceptor.install();
         installedInterceptors.push(interceptor);
         installed.push(interceptor.PROVIDER);
+
+        if (process.env.DEBUG_AGENTIC_LEARNING) {
+          console.log(`[AgenticLearning] ✓ Installed ${interceptor.PROVIDER} interceptor`);
+        }
       } catch (error) {
         // Silently skip interceptors that fail to install
+        if (process.env.DEBUG_AGENTIC_LEARNING) {
+          console.error(`[AgenticLearning] ✗ Failed to install ${interceptor.PROVIDER}:`, error);
+        }
+      }
+    } else {
+      if (process.env.DEBUG_AGENTIC_LEARNING) {
+        console.log(`[AgenticLearning] ✗ ${interceptor.PROVIDER} SDK not available`);
       }
     }
+  }
+
+  if (process.env.DEBUG_AGENTIC_LEARNING) {
+    console.log(`[AgenticLearning] Installed ${installed.length} interceptors:`, installed);
   }
 
   return installed;

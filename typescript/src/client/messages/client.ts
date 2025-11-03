@@ -5,12 +5,12 @@
  */
 
 import type { AgenticLearning } from '../index';
-import type { Letta } from '@letta-ai/letta-client';
+import type { Agents } from '@letta-ai/letta-client/resources/agents';
 import { MessagesContextClient } from './context';
 import type { Provider } from '../../types';
 
 // Use the Letta SDK's message type directly
-export type Message = Letta.LettaMessageUnion;
+export type Message = Agents.LettaMessageUnion;
 
 export interface ListMessagesOptions {
   before?: string;

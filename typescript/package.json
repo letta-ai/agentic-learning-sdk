@@ -90,7 +90,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@letta-ai/letta-client": "1.0.0-alpha.5",
+    "@letta-ai/letta-client": "1.0.0-alpha.12",
     "ts-node": "^10.9.2"
   }
 }

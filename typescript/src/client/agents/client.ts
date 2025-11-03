@@ -67,21 +67,21 @@ export class AgentsClient {
 
     const agent = await this.parent.letta.agents.create({
       name: options.agent,
-      agentType: 'letta_v1_agent',
-      memoryBlocks,
+      agent_type: 'letta_v1_agent',
+      memory_blocks: memoryBlocks,
       model,
       embedding: 'openai/text-embedding-3-small',
       tags: ['agentic-learning-sdk'],
-      enableSleeptime: true,
+      enable_sleeptime: true,
     });
 
     // Configure sleeptime manager
-    if (agent.multiAgentGroup?.id) {
+    if (agent.multi_agent_group?.id) {
       try {
-        await this.parent.letta.groups.modify(agent.multiAgentGroup.id, {
-          managerConfig: {
-            managerType: 'sleeptime' as const,
-            sleeptimeAgentFrequency: 2,
+        await this.parent.letta.groups.modify(agent.multi_agent_group.id, {
+          manager_config: {
+            manager_type: 'sleeptime' as const,
+            sleeptime_agent_frequency: 2,
           },
         });
       } catch (error) {
@@ -120,11 +120,12 @@ export class AgentsClient {
    */
   async retrieve(agent: string): Promise<Agent | null> {
     try {
-      const agents = await this.parent.letta.agents.list({
+      const page = await this.parent.letta.agents.list({
         name: agent,
         tags: ['agentic-learning-sdk'],
-        includeRelationships: ['memory', 'multi_agent_group', 'tags'],
+        include: ['agent.blocks', 'agent.managed_group', 'agent.tags']
       });
+      const agents = page.items || [];
       return agents.length > 0 ? (agents[0] as Agent) : null;
     } catch (error) {
       return null;
@@ -152,11 +153,11 @@ export class AgentsClient {
    * @returns List of agent objects
    */
   async list(): Promise<Agent[]> {
-    const agents = await this.parent.letta.agents.list({
+    const page = await this.parent.letta.agents.list({
       tags: ['agentic-learning-sdk'],
-      includeRelationships: ['memory', 'multi_agent_group', 'tags'],
+      include: ['agent.blocks', 'agent.managed_group', 'agent.tags']
     });
-    return agents as Agent[];
+    return (page.items || []) as Agent[];
   }
 
   /**
@@ -168,10 +169,11 @@ export class AgentsClient {
    */
   async _retrieveId(agent: string): Promise<string | null> {
     try {
-      const agents = await this.parent.letta.agents.list({
+      const page = await this.parent.letta.agents.list({
         name: agent,
         tags: ['agentic-learning-sdk'],
       });
+      const agents = page.items || [];
       return agents.length > 0 ? agents[0].id : null;
     } catch (error) {
       return null;

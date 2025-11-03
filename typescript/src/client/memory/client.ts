@@ -57,7 +57,9 @@ export class MemoryClient {
     if (!block.id) {
       throw new Error('Block created without ID');
     }
-    await this.parent.letta.agents.blocks.attach(agentState.id, block.id);
+    await this.parent.letta.agents.blocks.attach(block.id, {
+      agent_id: agentState.id
+    });
 
     return block as MemoryBlock;
   }
@@ -78,7 +80,7 @@ export class MemoryClient {
       return null;
     }
 
-    const blocks = (agentState as any).memory?.blocks || [];
+    const blocks = (agentState as any).blocks || (agentState as any).memory?.blocks || [];
     const existingBlock = blocks.find((b: any) => b.label === options.label);
 
     if (!existingBlock) {
@@ -105,7 +107,7 @@ export class MemoryClient {
       return null;
     }
 
-    const blocks = (agentState as any).memory?.blocks || (agentState as any).blocks || [];
+    const blocks = (agentState as any).blocks || (agentState as any).memory?.blocks || [];
     const block = blocks.find((b: any) => b.label === label);
     return block || null;
   }
@@ -123,9 +125,10 @@ export class MemoryClient {
       return [];
     }
 
-    // Return memory blocks from agent state (matches Python implementation)
-    // Note: TypeScript Letta client might use camelCase
-    const blocks = (agentState as any).memory?.blocks || (agentState as any).blocks || [];
+    // Return memory blocks from agent state
+    // In letta-client 1.0.0+, blocks are at the top level (agentState.blocks)
+    // The old memory.blocks path is deprecated but kept for backwards compatibility
+    const blocks = (agentState as any).blocks || (agentState as any).memory?.blocks || [];
     return blocks;
   }
 
@@ -142,7 +145,7 @@ export class MemoryClient {
       return false;
     }
 
-    const blocks = (agentState as any).memory?.blocks || (agentState as any).blocks || [];
+    const blocks = (agentState as any).blocks || (agentState as any).memory?.blocks || [];
     const block = blocks.find((b: any) => b.label === label);
     if (!block) {
       return false;
@@ -167,7 +170,7 @@ export class MemoryClient {
     }
 
     try {
-      const response = await this.parent.letta.agents.messages.create(sleeptimeAgent.id, {
+      const response = await this.parent.letta.agents.messages.send(sleeptimeAgent.id, {
         messages: [
           {
             role: 'user',
@@ -196,7 +199,7 @@ export class MemoryClient {
       return null;
     }
 
-    await this.parent.letta.agents.messages.create(sleeptimeAgent.id, {
+    await this.parent.letta.agents.messages.send(sleeptimeAgent.id, {
       messages: [
         {
           role: 'user',

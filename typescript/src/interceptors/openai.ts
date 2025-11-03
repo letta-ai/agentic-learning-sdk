@@ -30,39 +30,85 @@ export class OpenAIInterceptor extends BaseAPIInterceptor {
    */
   install(): void {
     try {
-      const OpenAI = require('openai');
+      const OpenAIModule = require('openai');
 
-      // Get the Completions class - try both default export and direct export
-      const ChatCompletions = OpenAI.Chat?.Completions;
-
-      if (ChatCompletions && ChatCompletions.prototype?.create) {
-        this.originalMethods.set('completions.create', ChatCompletions.prototype.create);
-
-        // Patch the create method
-        const self = this;
-        ChatCompletions.prototype.create = async function (
-          this: any,
-          params: any,
-          options?: any
-        ) {
-          return self.interceptCreate(this, params, options);
-        };
+      if (process.env.DEBUG_AGENTIC_LEARNING) {
+        console.log('[OpenAI] Installing interceptor...');
       }
 
-      // Also patch Responses API if available
-      try {
-        const Responses = OpenAI.Responses;
-        if (Responses && Responses.prototype?.create) {
-          this.originalMethods.set('responses.create', Responses.prototype.create);
+      // In production CommonJS, OpenAIModule itself is the constructor function
+      // and .Chat doesn't exist - only .default.Chat exists
+      // In TypeScript/ES6, both might exist due to transpilation
+      // We need to find which one is actually used
+      const targets = [];
 
+      // The default export is what's actually used in both cases
+      if (OpenAIModule.default?.Chat?.Completions) {
+        targets.push({ name: 'default', completions: OpenAIModule.default.Chat.Completions });
+      }
+
+      // Also check if there's a direct .Chat (might exist in some module systems)
+      if (OpenAIModule.Chat?.Completions && OpenAIModule.Chat.Completions !== OpenAIModule.default?.Chat?.Completions) {
+        targets.push({ name: 'direct', completions: OpenAIModule.Chat.Completions });
+      }
+
+      if (targets.length === 0) {
+        if (process.env.DEBUG_AGENTIC_LEARNING) {
+          console.log('[OpenAI] Could not find ChatCompletions class to patch');
+        }
+        return;
+      }
+
+      for (const target of targets) {
+        const ChatCompletions = target.completions;
+
+        if (ChatCompletions && ChatCompletions.prototype?.create) {
+          // Save original if not already saved
+          if (!this.originalMethods.has('completions.create')) {
+            this.originalMethods.set('completions.create', ChatCompletions.prototype.create);
+          }
+
+          // Patch the create method
           const self = this;
-          Responses.prototype.create = async function (
+          ChatCompletions.prototype.create = async function (
             this: any,
             params: any,
             options?: any
           ) {
-            return self.interceptResponsesCreate(this, params, options);
+            return self.interceptCreate(this, params, options);
           };
+
+          if (process.env.DEBUG_AGENTIC_LEARNING) {
+            console.log(`[OpenAI] Patched ChatCompletions.prototype.create`);
+          }
+        }
+      }
+
+      // Also patch Responses API if available (patch both exports like Chat.Completions)
+      try {
+        const responsesTargets = [];
+        if (OpenAIModule.Responses) {
+          responsesTargets.push(OpenAIModule.Responses);
+        }
+        if (OpenAIModule.default?.Responses) {
+          responsesTargets.push(OpenAIModule.default.Responses);
+        }
+
+        for (const Responses of responsesTargets) {
+          if (Responses && Responses.prototype?.create) {
+            if (!this.originalMethods.has('responses.create')) {
+              this.originalMethods.set('responses.create', Responses.prototype.create);
+            }
+
+            const self = this;
+            Responses.prototype.create = async function (
+              this: any,
+              params: any,
+              options?: any
+            ) {
+              return self.interceptResponsesCreate(this, params, options);
+            };
+          }
         }
       } catch {
         // Responses API not available, skip
@@ -116,6 +162,10 @@ export class OpenAIInterceptor extends BaseAPIInterceptor {
         throw new Error('Original method not found');
       }
       return originalMethod.call(context, params, options);
+    }
+
+    if (process.env.DEBUG_AGENTIC_LEARNING) {
+      console.log('[OpenAI] Intercepting for agent:', config.agentName);
     }
 
     // Extract user message
