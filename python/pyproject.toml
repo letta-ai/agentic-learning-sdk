@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentic-learning"
-version = "0.2.0"
+version = "0.2.1"
 description = "Drop-in SDK for adding persistent memory and learning to any agent."
 readme = "../README.md"
 requires-python = ">=3.8"
