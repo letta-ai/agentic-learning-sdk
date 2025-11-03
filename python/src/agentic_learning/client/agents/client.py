@@ -6,7 +6,7 @@ Provides agent management operations with name-based APIs.
 
 from typing import Any, List, Optional
 
-from letta_client import AgentState, SleeptimeManagerUpdate
+from letta_client.types import AgentState, SleeptimeManagerParam
 from .sleeptime import SleeptimeClient, AsyncSleeptimeClient
 from ..utils import memory_placeholder
 
@@ -63,7 +63,7 @@ class AgentClient:
         )
         self._letta.groups.modify(
             group_id=agent.multi_agent_group.id,
-            manager_config=SleeptimeManagerUpdate(
+            manager_config=SleeptimeManagerParam(
                 sleeptime_agent_frequency=2,
             ),
         )
@@ -102,10 +102,9 @@ class AgentClient:
         agents = self._letta.agents.list(
             name=agent,
             tags=["agentic-learning-sdk"],
-            #include=["agent.blocks", "agent.managed_group", "agent.tags"],
-            include_relationships=["memory", "multi_agent_group", "tags"],
+            include=["agent.blocks", "agent.managed_group", "agent.tags"],
         )
-        return agents[0] if agents else None
+        return agents.items[0] if agents.items else None
 
     def list(self) -> List[AgentState]:
         """
@@ -114,11 +113,11 @@ class AgentClient:
         Returns:
             (list[AgentState]): List of agent objects
         """
-        return self._letta.agents.list(
+        result = self._letta.agents.list(
             tags=["agentic-learning-sdk"],
-            #include=["agent.blocks", "agent.managed_group", "agent.tags"],
-            include_relationships=["memory", "multi_agent_group", "tags"],
+            include=["agent.blocks", "agent.managed_group", "agent.tags"],
         )
+        return result.items
 
     def delete(self, agent: str) -> bool:
         """
@@ -151,7 +150,7 @@ class AgentClient:
             name=agent,
             tags=["agentic-learning-sdk"],
         )
-        return agents[0].id if agents else None
+        return agents.items[0].id if agents.items else None
 
 
 # =============================================================================
@@ -205,7 +204,7 @@ class AsyncAgentClient:
         )
         await self._letta.groups.modify(
             group_id=agent.multi_agent_group.id,
-            manager_config=SleeptimeManagerUpdate(
+            manager_config=SleeptimeManagerParam(
                 sleeptime_agent_frequency=2,
             ),
         )
@@ -244,10 +243,9 @@ class AsyncAgentClient:
         agents = await self._letta.agents.list(
             name=agent,
             tags=["agentic-learning-sdk"],
-            #include=["agent.blocks", "agent.managed_group", "agent.tags"],
-            include_relationships=["memory", "multi_agent_group", "tags"],
+            include=["agent.blocks", "agent.managed_group", "agent.tags"],
         )
-        return agents[0] if agents else None
+        return agents.items[0] if agents.items else None
 
     async def list(self) -> List[AgentState]:
         """
@@ -256,11 +254,11 @@ class AsyncAgentClient:
         Returns:
             (list[AgentState]): List of agent objects
         """
-        return await self._letta.agents.list(
+        result = await self._letta.agents.list(
             tags=["agentic-learning-sdk"],
-            #include=["agent.blocks", "agent.managed_group", "agent.tags"],
-            include_relationships=["memory", "multi_agent_group", "tags"],
+            include=["agent.blocks", "agent.managed_group", "agent.tags"],
         )
+        return result.items
 
     async def delete(self, agent: str) -> bool:
         """
@@ -293,4 +291,4 @@ class AsyncAgentClient:
             name=agent,
             tags=["agentic-learning-sdk"],
         )
-        return agents[0].id if agents else None
+        return agents.items[0].id if agents.items else None

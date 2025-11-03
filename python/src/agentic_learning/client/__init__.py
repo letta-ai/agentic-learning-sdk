@@ -37,8 +37,6 @@ class AgenticLearning:
         self.base_url = base_url or os.getenv("LETTA_BASE_URL", None)
         self._letta = Letta(
             base_url=self.base_url,
-            token=token or os.getenv("LETTA_API_KEY", None),
-            project='default-project'
         )
 
         self.agents = AgentClient(self, self._letta)
@@ -76,7 +74,6 @@ class AsyncAgenticLearning:
         self.base_url = base_url or os.getenv("LETTA_BASE_URL", None)
         self._letta = AsyncLetta(
             base_url=self.base_url,
-            token=token or os.getenv("LETTA_API_KEY", None),
         )
 
         self.agents = AsyncAgentClient(self, self._letta)

@@ -5,7 +5,7 @@ Provides colored terminal output helpers.
 """
 
 from typing import List
-from letta_client import LettaMessageUnion
+from letta_client.types.agents.message import Message
 
 
 # ANSI color codes for terminal output
@@ -36,7 +36,7 @@ def print_r(message: str, end: str = "\n"):
     print(f"{RED}{message}{RESET}", end=end)
 
 
-def print_messages(messages: List[LettaMessageUnion]):
+def print_messages(messages: List[Message]):
     for message in messages:
         if message.message_type == "user_message":
             print_u(message.content)

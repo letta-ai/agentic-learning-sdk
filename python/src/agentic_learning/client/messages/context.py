@@ -6,7 +6,7 @@ Provides context management operations for messages.
 
 from typing import Any, List, Literal, Optional
 
-from letta_client import LettaMessageUnion
+from letta_client.types.agents.message import Message
 
 
 # =============================================================================
@@ -128,7 +128,7 @@ class AsyncContextClient:
 # =============================================================================
 
 
-def _convert_message_to_dict(message: LettaMessageUnion):
+def _convert_message_to_dict(message: Message):
     if isinstance(message.content, str):
         content = message.content
     else:
@@ -141,7 +141,7 @@ def _convert_message_to_dict(message: LettaMessageUnion):
     return None
 
 
-def _collapse_and_order_messages(messages: List[LettaMessageUnion], order: Literal["asc", "desc"] = "desc"):
+def _collapse_and_order_messages(messages: List[Message], order: Literal["asc", "desc"] = "desc"):
     for i, message in enumerate(messages):
         if message is None:
             del messages[len(messages) - i - 1]

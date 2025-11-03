@@ -18,7 +18,7 @@ dependencies = [
     "pydantic>=1.9.2",
     "pydantic-core>=2.18.2",
     "typing_extensions>=4.0.0",
-    "letta_client==1.0.0a5",
+    "letta_client==1.0.0a12",
 ]
 
 # Optional dependencies for different providers

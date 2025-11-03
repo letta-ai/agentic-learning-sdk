@@ -6,7 +6,7 @@ Provides context management operations for memory.
 
 from typing import Any, List, Optional
 
-from letta_client import Block
+from letta_client.types import BlockResponse
 
 
 # =============================================================================
@@ -98,12 +98,12 @@ class AsyncContextClient:
 # =============================================================================
 
 
-def _format_memory_blocks(blocks: List[Block]) -> Optional[str]:
+def _format_memory_blocks(blocks: List[BlockResponse]) -> Optional[str]:
     """
     Format memory blocks into a readable context string.
 
     Args:
-        blocks (list[Block]): List of memory block objects from Letta
+        blocks (list[BlockResponse]): List of memory block objects from Letta
 
     Returns:
         (str | None): Formatted string containing memory block contents
@@ -129,12 +129,12 @@ def _format_memory_blocks(blocks: List[Block]) -> Optional[str]:
     memory_system_message = "\n".join(formatted_lines)
     return f"<memory_blocks>\nThe following memory blocks are currently engaged:\n{memory_system_message}\n</memory_blocks>"
 
-def _format_memory_blocks_fallback(blocks: List[Block]) -> Optional[str]:
+def _format_memory_blocks_fallback(blocks: List[BlockResponse]) -> Optional[str]:
     """
     Format memory blocks into a readable context string.
 
     Args:
-        blocks (list[Block]): List of memory block objects from Letta
+        blocks (list[BlockResponse]): List of memory block objects from Letta
 
     Returns:
         (str | None): Formatted string containing memory block contents

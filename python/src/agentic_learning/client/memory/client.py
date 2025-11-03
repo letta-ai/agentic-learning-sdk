@@ -8,7 +8,8 @@ from typing import Any, List, Optional
 from .context import ContextClient, AsyncContextClient
 from ..utils import memory_placeholder
 
-from letta_client import Block, LettaMessageUnion
+from letta_client.types import BlockResponse
+from letta_client.types.agents.message import Message
 
 
 # =============================================================================
@@ -41,7 +42,7 @@ class MemoryClient:
         label: str,
         value: str = "",
         description: str = ""
-    ) -> Optional[Block]:
+    ) -> Optional[BlockResponse]:
         """
         Create a new memory block.
 
@@ -52,7 +53,7 @@ class MemoryClient:
             description (str): Description to guide the agent on how to use this block
 
         Returns:
-            (Block | None): Created memory block object, or None if agent not found
+            (BlockResponse | None): Created memory block object, or None if agent not found
         """
         agent_id = self._parent.agents._retrieve_id(agent=agent)
         if not agent_id:
@@ -73,7 +74,7 @@ class MemoryClient:
         label: str,
         value: str = "",
         description: str = ""
-    ) -> Optional[Block]:
+    ) -> Optional[BlockResponse]:
         """
         Upsert a new memory block.
 
@@ -84,7 +85,7 @@ class MemoryClient:
             description (str): Description to guide the agent on how to use this block
 
         Returns:
-            (Block | None): Created memory block object, or None if agent not found
+            (BlockResponse | None): Created memory block object, or None if agent not found
         """
         agent = self._parent.agents.retrieve(agent=agent)
         if not agent:
@@ -105,7 +106,7 @@ class MemoryClient:
         
         return block
 
-    def retrieve(self, agent: str, label: str) -> Optional[Block]:
+    def retrieve(self, agent: str, label: str) -> Optional[BlockResponse]:
         """
         Retrieve a memory block by label.
 
@@ -114,7 +115,7 @@ class MemoryClient:
             label: Label of the memory block to retrieve
 
         Returns:
-            (Block | None): Memory block object if found, None otherwise
+            (BlockResponse | None): Memory block object if found, None otherwise
         """
         agent = self._parent.agents.retrieve(agent=agent)
         if not agent:
@@ -126,7 +127,7 @@ class MemoryClient:
 
         return block[0]
 
-    def list(self, agent: str) -> List[Block]:
+    def list(self, agent: str) -> List[BlockResponse]:
         """
         List all memory blocks for the agent.
 
@@ -134,7 +135,7 @@ class MemoryClient:
             agent (str): Name of the agent to list memory blocks for
 
         Returns:
-            (list[Block]): List of memory block objects
+            (list[BlockResponse]): List of memory block objects
         """
         agent = self._parent.agents.retrieve(agent=agent)
         if not agent:
@@ -164,7 +165,7 @@ class MemoryClient:
         self._letta.blocks.delete(block_id=block[0].id)
         return True
     
-    def search(self, agent: str, prompt: str) -> List[LettaMessageUnion]:
+    def search(self, agent: str, prompt: str) -> List[Message]:
         """
         Query conversation using semantic search.
 
@@ -173,13 +174,13 @@ class MemoryClient:
             prompt (str): The prompt to ask the agent.
 
         Returns:
-            (List[LettaMessageUnion]): Message response from agent
+            (List[Message]): Message response from agent
         """
         sleeptime_agent = self._parent.agents.sleeptime.retrieve(agent=agent)
         if not sleeptime_agent:
             return []
 
-        response = self._letta.agents.messages.create(
+        response = self._letta.agents.messages.send(
             agent_id=sleeptime_agent.id,
             messages=[{
                 "role": "user",
@@ -204,7 +205,7 @@ class MemoryClient:
         if not sleeptime_agent:
             return []
 
-        self._letta.agents.messages.create(
+        self._letta.agents.messages.send(
             agent_id=sleeptime_agent.id,
             messages=[{
                 "role": "user",
@@ -244,7 +245,7 @@ class AsyncMemoryClient:
         label: str,
         value: str = "",
         description: str = "",
-    ) -> Optional[Block]:
+    ) -> Optional[BlockResponse]:
         """
         Create a new memory block.
 
@@ -255,7 +256,7 @@ class AsyncMemoryClient:
             description (str): Description to guide the agent on how to use this block
 
         Returns:
-            (Block | None): Created memory block object
+            (BlockResponse | None): Created memory block object
         """
         agent_id = await self._parent.agents._retrieve_id(agent=agent)
         if not agent_id:
@@ -276,7 +277,7 @@ class AsyncMemoryClient:
         label: str,
         value: str = "",
         description: str = "",
-    ) -> Optional[Block]:
+    ) -> Optional[BlockResponse]:
         """
         Create a new memory block.
 
@@ -287,7 +288,7 @@ class AsyncMemoryClient:
             description (str): Description to guide the agent on how to use this block
 
         Returns:
-            (Block | None): Created memory block object
+            (BlockResponse | None): Created memory block object
         """
         agent = await self._parent.agents.retrieve(agent=agent)
         if not agent:
@@ -308,7 +309,7 @@ class AsyncMemoryClient:
         
         return block
 
-    async def retrieve(self, agent: str, label: str) -> Optional[Block]:
+    async def retrieve(self, agent: str, label: str) -> Optional[BlockResponse]:
         """
         Retrieve a memory block by label.
 
@@ -317,7 +318,7 @@ class AsyncMemoryClient:
             label (str): Label of the memory block to retrieve
 
         Returns:
-            (Block | None): Memory block object if found, None otherwise
+            (BlockResponse | None): Memory block object if found, None otherwise
         """
         agent = await self._parent.agents.retrieve(agent=agent)
         if not agent:
@@ -329,7 +330,7 @@ class AsyncMemoryClient:
 
         return block[0]
 
-    async def list(self, agent: str) -> List[Block]:
+    async def list(self, agent: str) -> List[BlockResponse]:
         """
         List all memory blocks for the agent.
 
@@ -337,7 +338,7 @@ class AsyncMemoryClient:
             agent (str): Name of the agent to list memory blocks for
 
         Returns:
-            (list[Block]): List of memory block objects
+            (list[BlockResponse]): List of memory block objects
         """
         agent = await self._parent.agents.retrieve(agent=agent)
         if not agent:
@@ -367,7 +368,7 @@ class AsyncMemoryClient:
         await self._letta.blocks.delete(block[0].id)
         return True
     
-    async def search(self, agent: str, prompt: str) -> List[LettaMessageUnion]:
+    async def search(self, agent: str, prompt: str) -> List[Message]:
         """
         Query conversation using semantic search.
 
@@ -376,7 +377,7 @@ class AsyncMemoryClient:
             prompt (str): The prompt to ask the agent.
 
         Returns:
-            (List[LettaMessageUnion]): Message response from agent
+            (List[Message]): Message response from agent
         """
         sleeptime_agent = await self._parent.agents.sleeptime.retrieve(agent=agent)
         if not sleeptime_agent:
