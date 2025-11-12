@@ -7,61 +7,32 @@ This package automatically captures conversations and manages persistent memory
 through Letta, supporting multiple LLM SDKs including OpenAI, Anthropic, Gemini,
 and Claude Agent SDK.
 
-Quickstart (One Line!) - Sync:
+Quickstart (One Line!):
     >>> from agentic_learning import learning
     >>>
     >>> with learning(agent="my_agent"):
     >>>     # Your SDK calls here automatically have memory!
     >>>     pass
 
-Quickstart (One Line!) - Async:
-    >>> from agentic_learning import learning_async
+Usage with Custom Letta Client:
+    >>> from agentic_learning import learning, AgenticLearning
     >>>
-    >>> async with learning_async(agent="my_agent"):
-    >>>     # Your SDK calls here automatically have memory!
-    >>>     pass
-
-Usage with Custom Letta Client - Sync:
-    >>> from agentic_learning import learning
-    >>> from letta_client import Letta
+    >>> client = AgenticLearning(base_url="http://localhost:8283")
     >>>
-    >>> letta = Letta(base_url="http://localhost:8283")
-    >>>
-    >>> with learning(agent="my_agent", client=letta):
+    >>> with learning(agent="my_agent", client=client):
     >>>     # Your SDK calls here
     >>>     pass
 
-Usage with Custom Letta Client - Async:
-    >>> from agentic_learning import learning_async
-    >>> from letta_client import AsyncLetta
-    >>>
-    >>> letta = AsyncLetta(base_url="http://localhost:8283")
-    >>>
-    >>> async with learning_async(agent="my_agent", client=letta):
-    >>>     # Your SDK calls here
-    >>>     pass
-
-Usage with AgenticLearning Client - Sync:
+Usage with AgenticLearning Client:
     >>> from agentic_learning import AgenticLearning
     >>>
     >>> client = AgenticLearning()
     >>> agent = client.agents.create(name="my_agent")
     >>> agent = client.agents.retrieve(name="my_agent")
     >>> agents = client.agents.list()
-
-Usage with AgenticLearning Client - Async:
-    >>> from agentic_learning import AsyncAgenticLearning
-    >>>
-    >>> client = AsyncAgenticLearning()
-    >>> agent = await client.agents.create(name="my_agent")
-    >>> agent = await client.agents.retrieve(name="my_agent")
-    >>> agents = await client.agents.list()
 """
 
-from .core import (
-    learning,
-    learning_async,
-)
+from .core import learning
 from .client import (
     AgenticLearning,
     AsyncAgenticLearning,
@@ -70,9 +41,8 @@ from .client import (
 __version__ = "0.1.0"
 
 __all__ = [
-    # Context managers
+    # Context manager (works for both sync and async)
     "learning",
-    "learning_async",
     # Client classes
     "AgenticLearning",
     "AsyncAgenticLearning",

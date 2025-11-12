@@ -14,17 +14,14 @@ Usage:
 
 import asyncio
 from anthropic import AsyncAnthropic
-from agentic_learning import learning_async
+from agentic_learning import learning
 
-# Initialize LLM client
 client = AsyncAnthropic()
 
 async def ask_claude(message: str):
-    """Send a message to Claude and print the response."""
     print(f"User: {message}\n")
 
-    # That's it - wrap your API calls to enable persistent memory
-    async with learning_async(agent="quickstart-demo"):
+    async with learning(agent="quickstart-demo"):
         response = await client.messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=1024,
@@ -35,6 +32,8 @@ async def ask_claude(message: str):
 async def main():
     # Memory automatically persists across LLM API calls
     await ask_claude("My name is Alice and I love Python.")
+
+    await asyncio.sleep(5) # Wait for memory to persist
 
     await ask_claude("What's my name and favorite language?")
 

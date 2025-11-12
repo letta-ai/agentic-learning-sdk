@@ -14,6 +14,7 @@ Usage:
 
 from anthropic import Anthropic
 from agentic_learning import learning
+import time
 
 # Initialize LLM client
 client = Anthropic()
@@ -33,5 +34,7 @@ def ask_claude(message: str):
 
 # Memory automatically persists across LLM API calls
 ask_claude("My name is Alice and I love Python.")
+
+time.sleep(5) # Wait for memory to persist
 
 ask_claude("What's my name and favorite language?")

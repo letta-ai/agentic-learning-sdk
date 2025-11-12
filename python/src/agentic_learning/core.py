@@ -1,12 +1,12 @@
 """
 Agentic Learning SDK - Core Context Manager
 
-This module provides a context manager for automatic learning/memory integration
+This module provides a unified context manager for automatic learning/memory integration
 with Letta. It captures conversation turns and saves them to Letta for persistent memory.
 """
 
 from contextvars import ContextVar, Token
-from typing import List, Optional
+from typing import List, Optional, Union
 
 
 _LEARNING_CONFIG: ContextVar[Optional[dict]] = ContextVar('learning_config', default=None)
@@ -39,24 +39,34 @@ def _ensure_interceptors_installed():
 
 
 # =============================================================================
-# Sync implementation
+# Unified Dual-Mode Context Manager
 # =============================================================================
 
 
 class LearningContext:
-    """Sync context manager for Letta learning integration."""
+    """
+    Unified context manager for Letta learning integration.
 
-    def __init__(self, client: "AgenticLearning", agent: str, capture_only: bool, memory: List[str], model: str):
+    Supports both sync (with) and async (async with) usage patterns.
+    """
+
+    def __init__(
+        self,
+        agent: str,
+        client: Optional[Union["AgenticLearning", "AsyncAgenticLearning"]],
+        capture_only: bool,
+        memory: List[str],
+        model: str
+    ):
         """
         Initialize learning context.
 
         Args:
-            client: AgenticLearning client instance (sync)
             agent: Name of the Letta agent to use for memory storage
+            client: AgenticLearning or AsyncAgenticLearning client instance
             capture_only: Whether to skip auto-injecting memory into prompts
-                Set to True to capture conversations without memory injection on subsequent turns
             memory: List of Letta memory block labels to configure for the agent
-            model: Optional model to use for Letta agent (e.g. "anthropic/claude-sonnet-4-20250514")
+            model: Optional model to use for Letta agent
         """
         self.agent_name = agent
         self.client = client
@@ -66,8 +76,12 @@ class LearningContext:
         self._token: Optional[Token] = None
 
     def __enter__(self):
-        """Enter the learning context."""
+        """Enter the learning context (sync)."""
         _ensure_interceptors_installed()
+
+        if self.client is None:
+            from .client import AgenticLearning
+            self.client = AgenticLearning()
 
         self._token = _LEARNING_CONFIG.set({
             "agent_name": self.agent_name,
@@ -75,94 +89,25 @@ class LearningContext:
             "capture_only": self.capture_only,
             "memory": self.memory,
             "model": self.model,
-            "pending_user_message": None  # Buffer for batching messages
+            "pending_user_message": None
         })
 
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Exit the learning context."""
+        """Exit the learning context (sync)."""
         if self._token is not None:
             _LEARNING_CONFIG.reset(self._token)
 
-        return False # Don't suppress exceptions
-
-
-def learning(
-    agent: str = "letta_agent",
-    client: Optional["AgenticLearning"] = None,
-    capture_only: bool = False,
-    memory: List[str] = ["human"],
-    model: str = "anthropic/claude-sonnet-4-20250514",
-) -> LearningContext:
-    """
-    Create a sync learning context for automatic Letta integration.
-
-    All SDK interactions within this context will automatically:
-    1. Capture user messages and assistant responses
-    2. Save conversations to Letta for persistent memory
-    3. Inject Letta memory into prompts (if capture_only=False)
-
-    Args:
-        agent: Name of the Letta agent to use for memory storage. Defaults to 'letta_agent'.
-        client: Optional AgenticLearning client instance (sync). If None, will create default client using LETTA_API_KEY from env.
-        capture_only: Whether to capture conversations without automatic Letta memory injection (default: False)
-        memory: Optional list of Letta memory blocks to configure for the agent (default: ["human"])
-        model: Optional model to use for Letta agent (default: "anthropic/claude-sonnet-4-20250514")
-
-    Returns:
-        LearningContext that can be used as a sync context manager
-
-    Example:
-        >>> from agentic_learning import learning
-        >>>
-        >>> # Simplest usage - one line!
-        >>> with learning(agent="my_agent"):
-        >>>     # Your LLM API calls here
-        >>>     pass
-        >>>
-        >>> # With custom memory blocks
-        >>> with learning(agent="sales_bot", memory=["customer", "product"]):
-        >>>     # Your LLM API calls here
-        >>>     pass
-    """
-    if client is None:
-        from .client import AgenticLearning
-        client = AgenticLearning()
-
-    return LearningContext(agent=agent, client=client, capture_only=capture_only, memory=memory, model=model)
-
-
-# =============================================================================
-# Async implementation
-# =============================================================================
-
-
-class AsyncLearningContext:
-    """Async context manager for Letta learning integration."""
-
-    def __init__(self, client: "AsyncAgenticLearning", agent: str, capture_only: bool, memory: List[str], model: str):
-        """
-        Initialize async learning context.
-
-        Args:
-            client: AsyncAgenticLearning client instance (async)
-            agent: Name of the Letta agent to use for memory storage
-            capture_only: Whether to skip auto-injecting memory into prompts
-                Set to True to capture conversations without memory injection on subsequent turns
-            memory: List of Letta memory block labels to configure for the agent
-            model: Optional model to use for Letta agent (e.g. "anthropic/claude-sonnet-4-20250514")
-        """
-        self.agent_name = agent
-        self.client = client
-        self.capture_only = capture_only
-        self.memory = memory
-        self.model = model
-        self._token: Optional[Token] = None
+        return False
 
     async def __aenter__(self):
-        """Enter the learning context."""
+        """Enter the learning context (async)."""
         _ensure_interceptors_installed()
+
+        if self.client is None:
+            from .client import AsyncAgenticLearning
+            self.client = AsyncAgenticLearning()
 
         self._token = _LEARNING_CONFIG.set({
             "agent_name": self.agent_name,
@@ -170,28 +115,32 @@ class AsyncLearningContext:
             "capture_only": self.capture_only,
             "memory": self.memory,
             "model": self.model,
-            "pending_user_message": None  # Buffer for batching messages
+            "pending_user_message": None
         })
 
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Exit the learning context."""
+        """Exit the learning context (async)."""
         if self._token is not None:
             _LEARNING_CONFIG.reset(self._token)
 
-        return False # Don't suppress exceptions
+        return False
 
 
-def learning_async(
+def learning(
     agent: str = "letta_agent",
-    client: Optional["AsyncAgenticLearning"] = None,
+    client: Optional[Union["AgenticLearning", "AsyncAgenticLearning"]] = None,
     capture_only: bool = False,
     memory: List[str] = ["human"],
     model: str = "anthropic/claude-sonnet-4-20250514",
-) -> AsyncLearningContext:
+) -> LearningContext:
     """
-    Create an async learning context for automatic Letta integration.
+    Create a learning context for automatic Letta integration.
+
+    Works with both sync and async code patterns:
+    - Use with 'with' for synchronous code
+    - Use with 'async with' for asynchronous code
 
     All SDK interactions within this context will automatically:
     1. Capture user messages and assistant responses
@@ -200,29 +149,37 @@ def learning_async(
 
     Args:
         agent: Name of the Letta agent to use for memory storage. Defaults to 'letta_agent'.
-        client: Optional AsyncAgenticLearning client instance (async). If None, will create default client using LETTA_API_KEY from env.
+        client: Optional AgenticLearning or AsyncAgenticLearning client instance.
+                If None, will create appropriate client based on usage (sync vs async).
         capture_only: Whether to capture conversations without automatic Letta memory injection (default: False)
         memory: Optional list of Letta memory blocks to configure for the agent (default: ["human"])
         model: Optional model to use for Letta agent (default: "anthropic/claude-sonnet-4-20250514")
 
     Returns:
-        AsyncLearningContext that can be used as an async context manager
+        LearningContext that can be used with both 'with' and 'async with'
 
-    Example:
-        >>> from agentic_learning import learning_async
+    Examples:
+
+        >>> from agentic_learning import learning
+        >>> import anthropic
         >>>
-        >>> # Simplest usage - one line!
-        >>> async with learning_async(agent="my_agent"):
-        >>>     # Your LLM API calls here
-        >>>     pass
-        >>>
-        >>> # With custom memory blocks
-        >>> async with learning_async(agent="sales_bot", memory=["customer", "product"]):
+        >>> client = anthropic.Anthropic()
+        >>> with learning(agent="my_agent"):
+        >>>     response = client.messages.create(
+        >>>         model="claude-sonnet-4-20250514",
+        >>>         messages=[{"role": "user", "content": "Hello"}]
+        >>>     )
+
+        With custom memory blocks:
+
+        >>> with learning(agent="sales_bot", memory=["customer", "product"]):
         >>>     # Your LLM API calls here
         >>>     pass
     """
-    if client is None:
-        from .client import AsyncAgenticLearning
-        client = AsyncAgenticLearning()
-
-    return AsyncLearningContext(agent=agent, client=client, capture_only=capture_only, memory=memory, model=model)
+    return LearningContext(
+        agent=agent,
+        client=client,
+        capture_only=capture_only,
+        memory=memory,
+        model=model
+    )
