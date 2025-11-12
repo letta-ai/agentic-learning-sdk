@@ -187,6 +187,7 @@ All interceptors share common logic through `BaseAPIInterceptor`, making it easy
 AgenticLearning()
 ├── agents          # Agent management
 │   ├── create()
+│   ├── update()
 │   ├── retrieve()
 │   ├── list()
 │   ├── delete()

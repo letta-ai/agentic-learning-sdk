@@ -17,7 +17,7 @@ import asyncio
 import os
 import sys
 from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, AssistantMessage, TextBlock
-from agentic_learning import learning_async, AgenticLearning
+from agentic_learning import learning, AgenticLearning
 
 
 class InteractiveSession:
@@ -56,7 +56,7 @@ class InteractiveSession:
         print(f"{'=' * 80}\n")
 
         # Wrap entire session in memory context
-        async with learning_async(agent=self.agent_name, client=self.learning_client):
+        async with learning(agent=self.agent_name, client=self.learning_client):
             self.client = ClaudeSDKClient(self.options)
             await self.client.connect()
 
