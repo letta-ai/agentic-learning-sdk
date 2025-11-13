@@ -17,6 +17,7 @@ interface LearningConfig {
   captureOnly: boolean;
   memory: string[];
   model?: string;
+  memoryContext?: string | null; // Pre-fetched memory context
 }
 
 // Async-safe context storage using Node.js AsyncLocalStorage
@@ -78,12 +79,32 @@ export async function learning<T>(
   // Create default client if not provided
   const client = options.client || new (require('./client').AgenticLearning)();
 
+  // Pre-fetch memory context if not in captureOnly mode
+  let memoryContext: string | null = null;
+  if (!options.captureOnly) {
+    try {
+      if (process.env.DEBUG_AGENTIC_LEARNING) {
+        console.log(`[AgenticLearning] Fetching memory context for agent: ${options.agent}`);
+      }
+      memoryContext = await client.memory.context.retrieve(options.agent);
+      if (process.env.DEBUG_AGENTIC_LEARNING) {
+        console.log(`[AgenticLearning] Memory context retrieved:`, memoryContext ? `${memoryContext.substring(0, 100)}...` : 'null');
+      }
+    } catch (error) {
+      if (process.env.DEBUG_AGENTIC_LEARNING) {
+        console.error(`[AgenticLearning] Error fetching memory:`, error);
+      }
+      // Ignore errors - memory injection will be skipped
+    }
+  }
+
   const config: LearningConfig = {
     agentName: options.agent,
     client: client,
     captureOnly: options.captureOnly || false,
-    memory: options.memory || [],
+    memory: options.memory || ['human'], // Default to ['human'] like Python SDK
     model: options.model,
+    memoryContext, // Store pre-fetched memory context
   };
 
   // Use AsyncLocalStorage.run() for automatic context management

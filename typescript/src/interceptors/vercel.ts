@@ -70,8 +70,10 @@ export class VercelInterceptor extends BaseAPIInterceptor {
 
       for (const [providerPackage, modelClassNames] of Object.entries(PROVIDER_MODEL_CLASSES)) {
         // Find cached modules for this provider
-        for (const key of Object.keys(cache)) {
-          if (key.includes(providerPackage) && key.includes('index')) {
+        const matchingKeys = Object.keys(cache).filter(k => k.includes(providerPackage));
+
+        for (const key of matchingKeys) {
+          if (key.includes('index')) {
             const cachedModule = cache[key];
             if (cachedModule && cachedModule.exports) {
               // Try to find and patch model classes
@@ -366,52 +368,41 @@ export class VercelInterceptor extends BaseAPIInterceptor {
       return options;
     }
 
-    const client = config.client;
-    const agentName = config.agentName;
+    // Use pre-fetched memory context from config
+    const memoryContext = config.memoryContext;
 
-    if (!client || !agentName) {
+    if (!memoryContext) {
       return options;
     }
 
-    try {
-      // Retrieve memory context
-      const memoryContext = await client.memory.context.retrieve(agentName);
-
-      if (!memoryContext) {
-        return options;
-      }
-
-      // Inject memory context into system message
-      if (!options.prompt) {
-        return options;
-      }
-
-      // Add system message at the beginning if not present
-      const hasSystem = options.prompt.some((msg: any) => msg.role === 'system');
-
-      if (hasSystem) {
-        // Prepend to existing system message
-        options.prompt = options.prompt.map((msg: any) => {
-          if (msg.role === 'system') {
-            return {
-              ...msg,
-              content: memoryContext + '\n\n' + msg.content,
-            };
-          }
-          return msg;
-        });
-      } else {
-        // Add new system message
-        options.prompt = [
-          { role: 'system', content: memoryContext },
-          ...options.prompt,
-        ];
-      }
-
-      return options;
-    } catch (error) {
+    // Inject memory context into system message
+    if (!options.prompt) {
       return options;
     }
+
+    // Add system message at the beginning if not present
+    const hasSystem = options.prompt.some((msg: any) => msg.role === 'system');
+
+    if (hasSystem) {
+      // Prepend to existing system message
+      options.prompt = options.prompt.map((msg: any) => {
+        if (msg.role === 'system') {
+          return {
+            ...msg,
+            content: memoryContext + '\n\n' + msg.content,
+          };
+        }
+        return msg;
+      });
+    } else {
+      // Add new system message
+      options.prompt = [
+        { role: 'system', content: memoryContext },
+        ...options.prompt,
+      ];
+    }
+
+    return options;
   }
 
   /**

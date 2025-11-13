@@ -1,10 +1,8 @@
 /**
- * Claude Interceptor
+ * Claude Agent SDK Interceptor
  *
- * Interceptor for Claude Agent SDK (ClaudeSDKClient).
- *
- * This interceptor patches the SubprocessCLITransport layer to capture messages
- * going in/out of the Claude subprocess.
+ * Intercepts Claude Agent SDK calls by patching ProcessTransport prototype.
+ * Works with @anthropic-ai/claude-agent-sdk for TypeScript.
  */
 
 import { BaseAPIInterceptor } from './base';
@@ -12,7 +10,7 @@ import type { Provider } from '../types';
 import { getCurrentConfig } from '../core';
 import { saveConversationTurn } from './utils';
 
-interface TransportMessage {
+interface SDKMessage {
   type: string;
   message?: any;
   [key: string]: any;
@@ -20,243 +18,225 @@ interface TransportMessage {
 
 export class ClaudeInterceptor extends BaseAPIInterceptor {
   readonly PROVIDER: Provider = 'claude';
+  private patchedTransport = false;
 
   /**
-   * Check if claude-agent-sdk is available
+   * Check if @anthropic-ai/claude-agent-sdk is available
    */
   isAvailable(): boolean {
     try {
-      require('claude-agent-sdk');
+      // Strategy 1: Check if already loaded in cache
+      const Module = require('module');
+      const cache = (Module as any)._cache || require.cache;
+
+      const hasClaude = Object.keys(cache).some(k =>
+        k.includes('@anthropic-ai/claude-agent-sdk') &&
+        (k.includes('sdk.') || k.includes('index.'))
+      );
+
+      if (hasClaude) {
+        return true;
+      }
+
+      // Strategy 2: Try to require it directly (works if in accessible node_modules)
+      try {
+        require('@anthropic-ai/claude-agent-sdk');
+        return true;
+      } catch {
+        // Not in accessible path
+      }
+
+      // Strategy 3: Always return true and use lazy installation
+      // This allows interceptor to install hooks even if SDK not loaded yet
       return true;
-    } catch {
+    } catch (error) {
       return false;
     }
   }
 
   /**
-   * Install interceptor by patching SubprocessCLITransport methods
+   * Install interceptor by patching ProcessTransport prototype
    */
   install(): void {
+    if (this.patchedTransport) {
+      return; // Already installed
+    }
+
     try {
-      const claudeAgentSdk = require('claude-agent-sdk');
-      // Access the internal transport class
-      const SubprocessCLITransport =
-        claudeAgentSdk._internal?.transport?.subprocess_cli?.SubprocessCLITransport ||
-        claudeAgentSdk.SubprocessCLITransport;
+      // Strategy 1: Try to patch if SDK already in cache
+      const Module = require('module');
+      const cache = (Module as any)._cache || require.cache;
 
-      if (!SubprocessCLITransport) {
-        return; // Transport not available
+      // Find the SDK module in cache
+      const sdkKey = Object.keys(cache).find(k =>
+        k.includes('@anthropic-ai/claude-agent-sdk') &&
+        (k.includes('sdk.') || k.includes('index.'))
+      );
+
+      if (sdkKey) {
+        const claudeSDK = cache[sdkKey]?.exports;
+        if (claudeSDK && claudeSDK.query) {
+          // SDK found in cache, patch it now
+          this.patchClaudeSDK(claudeSDK, cache, sdkKey);
+          return;
+        }
       }
 
-      // Store original methods (only once)
-      if (!this.originalMethods.has('init')) {
-        this.originalMethods.set('init', SubprocessCLITransport.prototype.constructor);
-        this.originalMethods.set('write', SubprocessCLITransport.prototype.write);
-        this.originalMethods.set('read_messages', SubprocessCLITransport.prototype.readMessages);
-      }
+      // Strategy 2: SDK not loaded yet - install require hook to patch when it loads
+      this.installRequireHook();
 
-      const interceptor = this;
-
-      // Store original constructor
-      const OriginalConstructor = SubprocessCLITransport;
-
-      // Patch constructor to inject memory into system prompt
-      const PatchedConstructor = function (this: any, ...args: any[]) {
-        // Call original constructor
-        OriginalConstructor.apply(this, args);
-
-        // Inject memory into system prompt if enabled
-        const config = getCurrentConfig();
-        if (config) {
-          interceptor.injectMemoryIntoOptions(this._options || this.options, config);
-        }
-      };
-
-      // Copy prototype
-      PatchedConstructor.prototype = OriginalConstructor.prototype;
-
-      // Patch write() to capture outgoing messages
-      const originalWrite = SubprocessCLITransport.prototype.write;
-      SubprocessCLITransport.prototype.write = async function (this: any, data: string) {
-        const config = getCurrentConfig();
-
-        // Capture user message
-        if (config) {
-          await interceptor.captureOutgoingMessage(data, config);
-        }
-
-        // Call original write
-        return originalWrite.call(this, data);
-      };
-
-      // Patch readMessages() to capture incoming messages
-      const originalReadMessages = SubprocessCLITransport.prototype.readMessages;
-      SubprocessCLITransport.prototype.readMessages = function (this: any) {
-        const config = getCurrentConfig();
-
-        // Get original message iterator
-        const originalIterator = originalReadMessages.call(this);
-
-        // Wrap it if memory is enabled
-        if (config) {
-          return interceptor.wrapMessageIterator(originalIterator, config);
-        } else {
-          return originalIterator;
-        }
-      };
     } catch (error) {
-      // Silently fail if patching doesn't work
       if (process.env.DEBUG_AGENTIC_LEARNING) {
-        console.error('[Claude] Install failed:', error);
+        console.error('[Claude] Failed to patch:', error);
       }
     }
   }
 
   /**
-   * Uninstall interceptor and restore original methods
+   * Install a require hook to patch SDK when it's loaded
    */
-  uninstall(): void {
+  private installRequireHook(): void {
+    const Module = require('module');
+    const originalRequire = Module.prototype.require;
+    const self = this;
+
+    Module.prototype.require = function(this: any, id: string) {
+      const module = originalRequire.apply(this, arguments);
+
+      // Check if this is the Claude SDK
+      if (id.includes('@anthropic-ai/claude-agent-sdk') && !self.patchedTransport) {
+        if (process.env.DEBUG_AGENTIC_LEARNING) {
+          console.log('[Claude] SDK loaded via require hook, patching now...');
+        }
+
+        // Get cache and patch
+        const cache = (Module as any)._cache || require.cache;
+        const sdkKey = Object.keys(cache).find(k =>
+          k.includes('@anthropic-ai/claude-agent-sdk') &&
+          (k.includes('sdk.') || k.includes('index.'))
+        );
+
+        if (sdkKey && cache[sdkKey]?.exports) {
+          self.patchClaudeSDK(cache[sdkKey].exports, cache, sdkKey);
+        }
+      }
+
+      return module;
+    };
+
+    if (process.env.DEBUG_AGENTIC_LEARNING) {
+      console.log('[Claude] Installed require hook for lazy loading');
+    }
+  }
+
+  /**
+   * Patch the Claude SDK (shared logic for both strategies)
+   */
+  private patchClaudeSDK(claudeSDK: any, cache: any, sdkKey: string): void {
+    const self = this;
+
+    // Wrap query() with a Proxy to inject memory before it's called
+    const originalExports = cache[sdkKey].exports;
+    const proxiedExports = new Proxy(originalExports, {
+      get(target, prop) {
+        const value = target[prop];
+
+        if (prop === 'query' && typeof value === 'function') {
+          return function(params: any) {
+            const config = getCurrentConfig();
+
+            // Inject pre-fetched memory into systemPrompt option
+            if (config && !config.captureOnly && config.memoryContext) {
+              if (!params.options) {
+                params.options = {};
+              }
+              params.options.systemPrompt = config.memoryContext;
+
+              if (process.env.DEBUG_AGENTIC_LEARNING) {
+                console.log('[Claude] Injecting memory into systemPrompt');
+              }
+            }
+
+            return value.call(target, params);
+          };
+        }
+
+        return value;
+      }
+    });
+
+    cache[sdkKey].exports = proxiedExports;
+
+    // Get ProcessTransport class for message capture patching
+    let ProcessTransportClass: any = null;
     try {
-      const claudeAgentSdk = require('claude-agent-sdk');
-      const SubprocessCLITransport =
-        claudeAgentSdk._internal?.transport?.subprocess_cli?.SubprocessCLITransport ||
-        claudeAgentSdk.SubprocessCLITransport;
+      const dummyQuery = claudeSDK.query({ prompt: 'test', options: {} });
+      if (dummyQuery?.transport) {
+        ProcessTransportClass = dummyQuery.transport.constructor;
 
-      if (!SubprocessCLITransport) {
-        return;
-      }
-
-      // Restore original methods
-      if (this.originalMethods.has('write')) {
-        SubprocessCLITransport.prototype.write = this.originalMethods.get('write');
-      }
-      if (this.originalMethods.has('read_messages')) {
-        SubprocessCLITransport.prototype.readMessages = this.originalMethods.get('read_messages');
+        // Clean up dummy query
+        if (dummyQuery.transport.close) {
+          try {
+            const closeResult = dummyQuery.transport.close();
+            if (closeResult?.catch) closeResult.catch(() => {});
+          } catch {}
+        }
       }
     } catch {
-      // SDK not available
+      return;
     }
-  }
 
-  /**
-   * Extract user messages - not used for Claude (captured at transport layer)
-   */
-  extractUserMessages(): string {
-    return '';
-  }
+    if (!ProcessTransportClass?.prototype) {
+      return;
+    }
 
-  /**
-   * Extract assistant message - not used for Claude (captured at transport layer)
-   */
-  extractAssistantMessage(): string {
-    return '';
-  }
+    const proto = ProcessTransportClass.prototype;
 
-  /**
-   * Build request messages array for Letta
-   */
-  buildRequestMessages(userMessage: string): Array<{ role: string; content: string }> {
-    return [{ role: 'user', content: userMessage }];
-  }
+    // Store original methods
+    if (!this.originalMethods.has('write')) {
+      this.originalMethods.set('write', proto.write);
+    }
+    if (!this.originalMethods.has('readMessages')) {
+      this.originalMethods.set('readMessages', proto.readMessages);
+    }
 
-  /**
-   * Build response dict for Letta
-   */
-  buildResponseDict(response: any): { role: string; content: string } {
-    return {
-      role: 'assistant',
-      content: response?.content || '',
+    // Patch write to capture user messages
+    const originalWrite = this.originalMethods.get('write');
+    proto.write = async function(this: any, data: string) {
+      const config = getCurrentConfig();
+      if (config) {
+        self.captureUserMessage(data, config);
+      }
+      return originalWrite.call(this, data);
     };
+
+    // Patch readMessages to capture assistant responses
+    const originalReadMessages = this.originalMethods.get('readMessages');
+    proto.readMessages = function(this: any) {
+      const config = getCurrentConfig();
+      const messageIterator = originalReadMessages.call(this);
+      return config ? self.wrapMessageIterator(messageIterator, config) : messageIterator;
+    };
+
+    this.patchedTransport = true;
+    (global as any).__CLAUDE_INTERCEPTOR_REGISTERED__ = this;
+
+    if (process.env.DEBUG_AGENTIC_LEARNING) {
+      console.log('[Claude] Successfully patched Claude Agent SDK');
+    }
   }
 
   /**
-   * Extract model name from response
+   * Capture user message from transport write
    */
-  extractModelName(): string {
-    return 'claude'; // Claude Agent SDK doesn't expose model name
-  }
-
-  /**
-   * Inject memory context into Claude Agent options
-   */
-  injectMemoryContext(options: Record<string, any>, context: string): Record<string, any> {
-    if (!context) {
-      return options;
-    }
-
-    // Inject into system prompt
-    if (options.systemPrompt) {
-      if (typeof options.systemPrompt === 'string') {
-        options.systemPrompt = `${context}\n\n${options.systemPrompt}`;
-      } else if (typeof options.systemPrompt === 'object' && 'append' in options.systemPrompt) {
-        options.systemPrompt.append = `${context}\n\n${options.systemPrompt.append}`;
-      }
-    } else {
-      options.systemPrompt = context;
-    }
-
-    return options;
-  }
-
-  /**
-   * Inject memory into Claude Agent options system prompt
-   */
-  private injectMemoryIntoOptions(options: any, config: any): void {
-    // Check if capture_only is enabled
-    if (config.captureOnly) {
-      return;
-    }
-
-    const client = config.client;
-    const agentName = config.agentName;
-
-    if (!client || !agentName) {
-      return;
-    }
-
+  private captureUserMessage(data: string, config: any): void {
     try {
-      // Get memory context synchronously (Claude SDK init is sync)
-      const memoryContext = client.memory.context.retrieve(agentName);
+      const message: SDKMessage = JSON.parse(data);
 
-      if (!memoryContext) {
-        return;
-      }
-
-      // Inject into system prompt
-      if (options.systemPrompt) {
-        if (typeof options.systemPrompt === 'string') {
-          options.systemPrompt = `${memoryContext}\n\n${options.systemPrompt}`;
-        } else if (typeof options.systemPrompt === 'object' && 'append' in options.systemPrompt) {
-          options.systemPrompt.append = `${memoryContext}\n\n${options.systemPrompt.append}`;
-        }
-      } else {
-        options.systemPrompt = memoryContext;
-      }
-    } catch (error) {
-      // Don't crash if memory injection fails
-      if (process.env.DEBUG_AGENTIC_LEARNING) {
-        console.error('[Claude] Memory injection failed:', error);
-      }
-    }
-  }
-
-  /**
-   * Capture user messages from outgoing transport data
-   */
-  private async captureOutgoingMessage(data: string, config: any): Promise<void> {
-    try {
-      // Parse the JSON message
-      const message: TransportMessage = JSON.parse(data);
-      const msgType = message.type;
-
-      // Buffer user messages for batching
-      if (msgType === 'user') {
-        // Structure: {"type": "user", "message": {"role": "user", "content": "..."}}
-        const userMessage = message.message || {};
-        const content = userMessage.content || '';
-
+      if (message.type === 'user' && message.message) {
+        const content = this.extractContentFromMessage(message.message);
         if (content) {
-          // Buffer the user message instead of saving immediately
+          // Store user message in config for later pairing with assistant response
           config.pendingUserMessage = content;
         }
       }
@@ -266,67 +246,178 @@ export class ClaudeInterceptor extends BaseAPIInterceptor {
   }
 
   /**
-   * Wrap the message iterator to accumulate and save assistant responses
+   * Extract text content from message
+   */
+  private extractContentFromMessage(message: any): string {
+    if (typeof message.content === 'string') {
+      return message.content;
+    }
+
+    if (Array.isArray(message.content)) {
+      const textParts: string[] = [];
+      for (const block of message.content) {
+        if (block.type === 'text' && block.text) {
+          textParts.push(block.text);
+        }
+      }
+      return textParts.join('');
+    }
+
+    return '';
+  }
+
+  /**
+   * Wrap message iterator to capture assistant responses
    */
   private async *wrapMessageIterator(
-    originalIterator: AsyncIterableIterator<TransportMessage>,
+    originalIterator: AsyncIterableIterator<SDKMessage>,
     config: any
-  ): AsyncIterableIterator<TransportMessage> {
+  ): AsyncIterableIterator<SDKMessage> {
     const accumulatedText: string[] = [];
 
     try {
       for await (const message of originalIterator) {
-        const msgType = message.type || 'unknown';
-
         // Accumulate assistant text
-        if (msgType === 'assistant') {
-          // Structure: {"type": "assistant", "message": {"content": [{"type": "text", "text": "..."}]}}
-          const assistantMessage = message.message || {};
-          const contentBlocks = assistantMessage.content || [];
-
-          for (const block of contentBlocks) {
-            if (block.type === 'text' && block.text) {
-              accumulatedText.push(block.text);
-            }
+        if (message.type === 'assistant' && message.message) {
+          const content = this.extractContentFromMessage(message.message);
+          if (content) {
+            accumulatedText.push(content);
           }
         }
 
-        // Always yield immediately for streaming
+        // Always yield the message for streaming
         yield message;
       }
     } finally {
-      // Save user message + assistant response to Letta
+      // After iteration completes, save the conversation
       const userMessage = config.pendingUserMessage;
-      const assistantMessage = accumulatedText.length > 0 ? accumulatedText.join('') : null;
+      const assistantMessage = accumulatedText.join('');
 
-      // Only save if we have at least one message
       if (userMessage || assistantMessage) {
-        try {
-          // Save asynchronously (don't await)
-          saveConversationTurn(
-            this.PROVIDER,
-            'claude',
-            userMessage ? this.buildRequestMessages(userMessage) : [],
-            {
-              role: 'assistant',
-              content: assistantMessage || '',
-            }
-          ).catch(() => {
-            // Silently fail
-          });
-        } catch (error) {
+        // Save conversation turn
+        saveConversationTurn(
+          this.PROVIDER,
+          'claude',
+          userMessage ? this.buildRequestMessages(userMessage) : [],
+          {
+            role: 'assistant',
+            content: assistantMessage,
+          }
+        ).catch(() => {
           // Silently fail
-        }
+        });
 
-        // Clear the buffer
+        // Clear pending message
         config.pendingUserMessage = null;
       }
     }
   }
 
   /**
-   * Build response from streaming chunks - not used for Claude
+   * Uninstall interceptor and restore original methods
    */
+  uninstall(): void {
+    try {
+      // Get the SDK from cache
+      const Module = require('module');
+      const cache = (Module as any)._cache || require.cache;
+
+      const sdkKey = Object.keys(cache).find(k =>
+        k.includes('@anthropic-ai/claude-agent-sdk') &&
+        (k.includes('sdk.') || k.includes('index.'))
+      );
+
+      if (!sdkKey) {
+        return;
+      }
+
+      const claudeSDK = cache[sdkKey]?.exports;
+
+      if (claudeSDK && claudeSDK.query) {
+        const dummyQuery = claudeSDK.query({
+          prompt: 'test',
+          options: {}
+        });
+
+        if (dummyQuery && dummyQuery.transport) {
+          const proto = dummyQuery.transport.constructor.prototype;
+
+          // Restore original methods
+          if (this.originalMethods.has('write')) {
+            proto.write = this.originalMethods.get('write');
+          }
+          if (this.originalMethods.has('readMessages')) {
+            proto.readMessages = this.originalMethods.get('readMessages');
+          }
+          if (this.originalMethods.has('initialize')) {
+            proto.initialize = this.originalMethods.get('initialize');
+          }
+
+          // Clean up
+          if (dummyQuery.transport.close) {
+            try {
+              const closeResult = dummyQuery.transport.close();
+              if (closeResult && typeof closeResult.catch === 'function') {
+                closeResult.catch(() => {});
+              }
+            } catch (error) {
+              // Ignore
+            }
+          }
+        }
+      }
+
+      this.patchedTransport = false;
+      this.originalMethods.clear();
+    } catch {
+      // SDK not available
+    }
+  }
+
+  /**
+   * Required abstract methods from BaseAPIInterceptor
+   */
+
+  extractUserMessages(): string {
+    return '';
+  }
+
+  extractAssistantMessage(): string {
+    return '';
+  }
+
+  buildRequestMessages(userMessage: string): Array<{ role: string; content: string }> {
+    return [{ role: 'user', content: userMessage }];
+  }
+
+  buildResponseDict(response: any): { role: string; content: string } {
+    return {
+      role: 'assistant',
+      content: response?.content || '',
+    };
+  }
+
+  extractModelName(): string {
+    return 'claude';
+  }
+
+  injectMemoryContext(options: Record<string, any>, context: string): Record<string, any> {
+    if (!context) {
+      return options;
+    }
+
+    // Inject into system prompt
+    if (options.systemPrompt) {
+      if (typeof options.systemPrompt === 'string') {
+        options.systemPrompt = `${context}\n\n${options.systemPrompt}`;
+      }
+    } else {
+      options.systemPrompt = context;
+    }
+
+    return options;
+  }
+
   protected buildResponseFromChunks(): any {
     return { content: '' };
   }

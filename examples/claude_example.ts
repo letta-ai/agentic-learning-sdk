@@ -1,8 +1,9 @@
 /**
  * Claude Agent SDK Example - Agentic Learning SDK
  *
- * This example shows how to use the Agentic Learning SDK with Claude Agent SDK.
- * The SDK automatically captures conversations and manages persistent memory.
+ * IMPORTANT: Claude Agent SDK requires dynamic import (require() inside learning callback)
+ * for memory injection to work. The SDK spawns a subprocess at construction time, so it
+ * must be patched before loading via a require hook. Don't use top-level imports!
  *
  * Prerequisites:
  *     npm install @letta-ai/agentic-learning @anthropic-ai/claude-agent-sdk
@@ -13,7 +14,6 @@
  *     npx tsx claude_example.ts
  */
 
-import { query } from "@anthropic-ai/claude-agent-sdk";
 import { learning } from "@letta-ai/agentic-learning";
 
 async function askClaude(message: string) {
@@ -22,6 +22,9 @@ async function askClaude(message: string) {
 
   // That's it - wrap your API calls to enable persistent memory
   await learning({ agent: 'claude-demo' }, async () => {
+    // IMPORTANT: Use require() here (not import at top) for memory injection to work
+    const { query } = require("@anthropic-ai/claude-agent-sdk");
+
     const conversation = query({
       prompt: message,
       options: {}
