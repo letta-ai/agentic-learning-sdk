@@ -33,7 +33,13 @@ npm run openai
 - `claude_example_interactive.py` - Interactive CLI with Claude
 
 ### TypeScript
-- `openai_example.ts` - OpenAI integration
+- `openai_example.ts` - OpenAI Chat Completions
+- `anthropic_example.ts` - Anthropic Claude
+- `gemini_example.ts` - Google Gemini
+- `claude_example.ts` - Claude Agent SDK
+- `vercel_example.ts` - Vercel AI SDK (🛠️ Experimental)
+- `streaming_example.ts` - Streaming examples
+- `capture_only_example.ts` - Capture-only mode
 
 ## What the Examples Show
 

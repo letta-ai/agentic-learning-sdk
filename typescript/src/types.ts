@@ -7,4 +7,4 @@
 /**
  * Provider type - represents supported LLM providers
  */
-export type Provider = 'gemini' | 'claude' | 'anthropic' | 'openai';
+export type Provider = 'gemini' | 'claude' | 'anthropic' | 'openai' | 'vercel';

@@ -64,7 +64,7 @@ That's it - this SDK automatically:
 | **OpenAI Chat Completions** | `openai` | ✅ Stable | [openai_example.ts](examples/openai_example.ts) |
 | **OpenAI Responses API** | `openai` | ✅ Stable | [openai_responses_example.ts](examples/openai_responses_example.ts) |
 | **Gemini** | `google-generativeai` | ✅ Stable | [gemini_example.ts](examples/gemini_example.ts) |
-| **Vercel AI SDK** | `ai-sdk` | ✅ Stable | [vercel_example.ts](examples/vercel_example.ts) |
+| **Vercel AI SDK** | `ai-sdk` | 🛠️ Experimental | [vercel_example.ts](examples/vercel_example.ts) |
 
 ### Examples
 

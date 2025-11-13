@@ -13,7 +13,7 @@ with learning(agent="my_agent"):
 
 ## Features
 
-- **🔌 Drop-in Integration** - Works with Anthropic, Claude Agents SDK, OpenAI (Chat Completions & Responses), and Gemini
+- **🔌 Drop-in Integration** - Works with Anthropic, Claude Agent SDK, OpenAI (Chat Completions & Responses), Gemini, and Vercel AI SDK
 - **💾 Persistent Memory** - Conversations automatically saved and recalled across sessions
 - **🎯 Zero Configuration** - No prompt engineering or manual context management required
 - **⚡ Streaming Support** - Full support for streaming responses
@@ -69,11 +69,11 @@ That's it - this SDK automatically:
 | Provider | Package | Status | Py Example | TS Example |
 |----------|---------|--------|------------|------------|
 | **Anthropic** | `anthropic` | ✅ Stable | [anthropic_example.py](examples/anthropic_example.py) | [anthropic_example.ts](examples/anthropic_example.ts) |
-| **Claude Agents SDK** | `claude-agent-sdk` | ✅ Stable | [claude_example.py](examples/claude_example.py) | [claude_example.ts](examples/claude_example.ts) |
+| **Claude Agent SDK** | `claude-agent-sdk` | ✅ Stable | [claude_example.py](examples/claude_example.py) | [claude_example.ts](examples/claude_example.ts) |
 | **OpenAI Chat Completions** | `openai` | ✅ Stable | [openai_example.py](examples/openai_example.py) | [openai_example.ts](examples/openai_example.ts) |
 | **OpenAI Responses API** | `openai` | ✅ Stable | [openai_responses_example.py](examples/openai_responses_example.py) | [openai_responses_example.ts](examples/openai_responses_example.ts) |
 | **Gemini** | `google-generativeai` | ✅ Stable | [gemini_example.py](examples/gemini_example.py) | [gemini_example.ts](examples/gemini_example.ts) |
-| **Vercel AI SDK** | `ai-sdk` | ✅ Experimental | | [vercel_example.ts](examples/vercel_example.ts) |
+| **Vercel AI SDK** | `ai-sdk` | 🛠️ Experimental | | [vercel_example.ts](examples/vercel_example.ts) |
 
 See [examples/README.md](examples/README.md) for detailed documentation.
 
