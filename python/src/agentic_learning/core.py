@@ -89,7 +89,8 @@ class LearningContext:
             "capture_only": self.capture_only,
             "memory": self.memory,
             "model": self.model,
-            "pending_user_message": None
+            "pending_user_message": None,
+            "pending_tasks": [] 
         })
 
         return self
@@ -115,13 +116,28 @@ class LearningContext:
             "capture_only": self.capture_only,
             "memory": self.memory,
             "model": self.model,
-            "pending_user_message": None
+            "pending_user_message": None,
+            "pending_tasks": []  
         })
 
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Exit the learning context (async)."""
+        # Wait for any pending capture tasks (from Claude interceptor) to complete
+        # before resetting context. This ensures the capture logic has access to config.
+        config = _LEARNING_CONFIG.get()
+        if config:
+            pending_tasks = config.get("pending_tasks", [])
+            if pending_tasks:
+                # Give pending tasks a short grace period to complete
+                import asyncio
+                try:
+                    await asyncio.wait(pending_tasks, timeout=5.0)
+                except asyncio.TimeoutError:
+                    # Tasks didn't complete in time
+                    pass
+
         if self._token is not None:
             _LEARNING_CONFIG.reset(self._token)
 

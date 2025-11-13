@@ -108,6 +108,7 @@ async def _save_conversation_turn_async(
     model: str,
     request_messages: List[dict] = None,
     response_dict: Dict[str, str] = None,
+    register_task: bool = False,
 ):
     """
     Save a conversation turn to Letta in a single API call (async version).
@@ -117,6 +118,9 @@ async def _save_conversation_turn_async(
         model: Model name
         request_messages: List of request messages
         response_dict: Response from provider
+        register_task: If True, create and register task instead of awaiting directly.
+                      Use this for async generators where the context might exit during cleanup.
+                      (default: False - executes immediately)
     """
     config = get_current_config()
     if not config:
@@ -124,24 +128,22 @@ async def _save_conversation_turn_async(
 
     agent = config["agent_name"]
     client = config["client"]
+    memory = config.get("memory")
+    model_config = config.get("model")
 
     if not client:
         return
 
-    try:
-        # Check if client is async or sync
-        import inspect
-        is_async_client = inspect.iscoroutinefunction(client.agents.retrieve)
-
-        if is_async_client:
+    async def save_task():
+        try:
             # Get or create agent using async API
             agent_state = await client.agents.retrieve(agent=agent)
 
             if not agent_state:
                 agent_state = await client.agents.create(
                     agent=agent,
-                    memory=config["memory"],
-                    model=config["model"],
+                    memory=memory,
+                    model=model_config,
                 )
 
             return await client.messages.capture(
@@ -151,25 +153,16 @@ async def _save_conversation_turn_async(
                 model=model,
                 provider=provider,
             )
-        else:
-            # Use sync client (common when using sync client with async context)
-            agent_state = client.agents.retrieve(agent=agent)
 
-            if not agent_state:
-                agent_state = client.agents.create(
-                    agent=agent,
-                    memory=config["memory"],
-                    model=config["model"],
-                )
+        except Exception as e:
+            import sys
+            print(f"[Warning] Failed to save conversation turn: {e}", file=sys.stderr)
 
-            return client.messages.capture(
-                agent=agent,
-                request_messages=request_messages or [],
-                response_dict=response_dict or {},
-                model=model,
-                provider=provider,
-            )
-
-    except Exception as e:
-        import sys
-        print(f"[Warning] Failed to save conversation turn: {e}", file=sys.stderr)
+    if register_task:
+        # Create and register the task for later awaiting (used by Claude interceptor)
+        import asyncio
+        task = asyncio.create_task(save_task())
+        config.get("pending_tasks", []).append(task)
+    else:
+        # Execute immediately (used by other interceptors)
+        await save_task()

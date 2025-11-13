@@ -232,7 +232,8 @@ class ClaudeInterceptor(BaseInterceptor):
                     provider=self.PROVIDER,
                     model="claude",
                     request_messages=self.build_request_messages(user_message) if user_message else [],
-                    response_dict={"role": "assistant", "content": assistant_message} if assistant_message else {"role": "assistant", "content": ""}
+                    response_dict={"role": "assistant", "content": assistant_message} if assistant_message else {"role": "assistant", "content": ""},
+                    register_task=True,
                 )
 
                 # Clear the buffer
