@@ -82,7 +82,7 @@ describe('OpenAI Chat Completions Interceptor', () => {
     const OpenAI = require('openai').default;
     const openai = new OpenAI();
     return await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5',
       messages: [{ role: 'user', content: prompt }],
     });
   };

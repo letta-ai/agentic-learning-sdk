@@ -26,7 +26,7 @@ class TestOpenAIResponsesUnit:
         """Mock OpenAI Responses response."""
         response = Mock()
         response.output = "Mock response"
-        response.model = "gpt-4o"
+        response.model = "gpt-5"
         return response
 
     @pytest.fixture
@@ -51,7 +51,7 @@ class TestOpenAIResponsesUnit:
         """Function to make OpenAI responses calls."""
         def _make_call(prompt: str):
             response = openai_client.responses.create(
-                model="gpt-4o",
+                model="gpt-5",
                 input=prompt,
             )
             return response

@@ -42,7 +42,7 @@ def ask_gpt(message: str):
     # That's it - wrap your API calls to enable persistent memory
     with learning(agent="openai-responses-demo"):
         response = client.responses.create(
-            model="gpt-4o",
+            model="gpt-5",
             input=message
         )
         print(f"Assistant: {get_text_from_output(response.output)}\n")

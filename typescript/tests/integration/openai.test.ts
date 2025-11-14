@@ -43,7 +43,7 @@ describe('OpenAI Chat Completions Integration', () => {
   // Helper to make OpenAI call
   const makeCall = async (prompt: string) => {
     return await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5',
       messages: [{ role: 'user', content: prompt }],
     });
   };

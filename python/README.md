@@ -1,23 +1,28 @@
-# Agentic Learning SDK
+# Agentic Learning SDK (Python)
 
-Add persistent memory to any LLM agent with one line of code. This Agentic Learning SDK automatically captures conversations, manages context, and enables agents to remember information across sessions.
+Add continual learning to any LLM agent with one line of code. This SDK enables agents to learn from every conversation and recall context across sessions—making your agents truly stateful.
 
 ```python
+from openai import OpenAI
+from agentic_learning import learning
+
+client = OpenAI()
+
 with learning(agent="my_agent"):
-    response = client.chat.completions.create(...)  # Memory handled automatically
+    response = client.chat.completions.create(...)  # LLM is now stateful!
 ```
 
 [![PyPI Version](https://img.shields.io/pypi/v/agentic-learning.svg)](https://pypi.org/project/agentic-learning/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](../LICENSE)
+[![Tests](https://img.shields.io/badge/tests-36%2F36%20passing-brightgreen)](tests/)
 
-## Get Started
-
-### Installation
+## Installation
 
 ```bash
 pip install agentic-learning
 ```
 
-### Basic Usage
+## Quick Start
 
 ```bash
 # Set your API keys
@@ -31,75 +36,91 @@ from agentic_learning import learning
 
 client = OpenAI()
 
-# Add memory to your agent with one line
-with learning(agent="my-agent"):
+# Add continual learning with one line
+with learning(agent="my_assistant"):
     # Your LLM call - conversation is automatically captured
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-5",
         messages=[{"role": "user", "content": "My name is Alice"}]
     )
 
     # Agent remembers prior context
     response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": "What is my name?"}]
+        model="gpt-5",
+        messages=[{"role": "user", "content": "What's my name?"}]
     )
     # Returns: "Your name is Alice"
 ```
 
 That's it - this SDK automatically:
-- ✅ Captures all conversations
-- ✅ Injects relevant memory into prompts
-- ✅ Saves to persistent storage (Letta)
-- ✅ Recalls information across sessions
+- ✅ Learns from every conversation
+- ✅ Recalls relevant context when needed
+- ✅ Remembers across sessions
+- ✅ Works with your existing LLM code
 
 ## Supported Providers
 
 | Provider | Package | Status | Example |
 |----------|---------|--------|---------|
-| **Anthropic** | `anthropic` | ✅ Stable | [anthropic_example.py](../examples/anthropic_example.py) |
-| **Claude Agent SDK** | `claude-agent-sdk` | ✅ Stable | [claude_example.py](../examples/claude_example.py) |
-| **OpenAI Chat Completions** | `openai` | ✅ Stable | [openai_example.py](../examples/openai_example.py) |
-| **OpenAI Responses API** | `openai` | ✅ Stable | [openai_responses_example.py](../examples/openai_responses_example.py) |
-| **Gemini** | `google-generativeai` | ✅ Stable | [gemini_example.py](../examples/gemini_example.py) |
+| **OpenAI Chat** | `openai>=1.0.0` | ✅ Stable | [openai_example.py](../examples/openai_example.py) |
+| **OpenAI Responses** | `openai>=1.0.0` | ✅ Stable | [openai_responses_example.py](../examples/openai_responses_example.py) |
+| **Anthropic** | `anthropic>=0.18.0` | ✅ Stable | [anthropic_example.py](../examples/anthropic_example.py) |
+| **Claude Agent SDK** | `@anthropic-ai/claude-agent-sdk>=0.1.0` | ✅ Stable | [claude_example.py](../examples/claude_example.py) |
+| **Gemini** | `google-generativeai>=0.3.0` | ✅ Stable | [gemini_example.py](../examples/gemini_example.py) |
 
-### Examples
+## Key Features
 
-See the top-level [`../examples/`](../examples/) directory for examples:
+### Memory Across Sessions
+```python
+# First session
+with learning(agent="sales_bot"):
+    response = client.chat.completions.create(
+        messages=[{"role": "user", "content": "I'm interested in Product X"}]
+    )
 
-```bash
-# Run from examples directory
-cd ../examples
-pip install -r requirements.txt
-python openai_example.py
+# Later session - agent remembers automatically
+with learning(agent="sales_bot"):
+    response = client.chat.completions.create(
+        messages=[{"role": "user", "content": "Tell me more about that product"}]
+    )
+    # Agent knows you're asking about Product X
 ```
 
-## Core concepts in Letta:
+### Capture-Only Mode
+```python
+# Store conversations without injecting memory
+with learning(agent="my_agent", capture_only=True):
+    response = client.chat.completions.create(...)
+```
 
-Letta is built on the [MemGPT](https://arxiv.org/abs/2310.08560) research paper, which introduced the concept of the "LLM Operating System" for memory management:
+### Knowledge Search
+```python
+from agentic_learning import AgenticLearning
 
-1. [**Memory Hierarchy**](https://docs.letta.com/guides/agents/memory): Agents have self-editing memory split between in-context and out-of-context memory
-2. [**Memory Blocks**](https://docs.letta.com/guides/agents/memory-blocks): In-context memory is composed of persistent editable blocks
-3. [**Agentic Context Engineering**](https://docs.letta.com/guides/agents/context-engineering): Agents control their context window using tools to edit, delete, or search memory
-4. [**Perpetual Self-Improving Agents**](https://docs.letta.com/guides/agents/overview): Every agent has a perpetual (infinite) message history
+learning_client = AgenticLearning()
 
+# Search agent's memory
+messages = learning_client.memory.search(
+    agent="my_agent",
+    query="What are my project requirements?"
+)
+```
 
 ## Local Development
 
-Connect to a local Letta server instead of the cloud:
+### Using Local Letta Server
 
 ```python
 from agentic_learning import AgenticLearning, learning
 
+# Connect to local server
 learning_client = AgenticLearning(base_url="http://localhost:8283")
 
-with learning(agent="my-agent", client=learning_client):
-    # Your LLM call - conversation is automatically captured
+with learning(agent="my_agent", client=learning_client):
     response = client.chat.completions.create(...)
 ```
 
 Run Letta locally with Docker:
-
 ```bash
 docker run \
   -v ~/.letta/.persist/pgdata:/var/lib/postgresql/data \
@@ -110,22 +131,50 @@ docker run \
 
 See the [self-hosting guide](https://docs.letta.com/guides/selfhosting) for more options.
 
-### Development
+### Development Setup
 
 ```bash
+# Clone repository
+git clone https://github.com/letta-ai/agentic-learning-sdk.git
+cd agentic-learning-sdk/python
+
 # Install in development mode
 pip install -e .
 
-# Build
-python -m build
-
 # Run tests
-pytest
+pytest tests/ -v
 
-# Run specific test
-pytest tests/test_openai.py
+# Run specific provider tests
+pytest tests/ -m openai -v
+pytest tests/ -m anthropic -v
 ```
+
+## Examples
+
+See the [`examples/`](../examples/) directory for complete working examples:
+
+```bash
+cd ../examples
+pip install -r requirements.txt
+python openai_example.py
+```
+
+## Documentation
+
+- 📖 [Full Documentation](../README.md) - Complete SDK documentation
+- 🧪 [Test Suite](tests/README.md) - 36/36 tests passing (100%)
+- 🎯 [Examples](../examples/README.md) - Working examples for all providers
+- 💬 [Letta Discord](https://discord.gg/letta) - Community support
+- 📚 [Letta Docs](https://docs.letta.com/) - Letta platform documentation
+
+## Requirements
+
+- Python 3.9+
+- Letta API key (sign up at [letta.com](https://www.letta.com/))
+- At least one LLM provider SDK
 
 ## License
 
-Apache-2.0
+Apache 2.0 - See [LICENSE](../LICENSE) for details.
+
+Built with [Letta](https://www.letta.com/) - the leading platform for building stateful AI agents with long-term memory.

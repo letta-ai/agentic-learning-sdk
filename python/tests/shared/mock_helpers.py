@@ -44,7 +44,7 @@ def create_mock_text_response(text, model_name, role="assistant"):
     return response
 
 
-def create_openai_mock_response(text="Mock response", model="gpt-4o"):
+def create_openai_mock_response(text="Mock response", model="gpt-5"):
     """Create mock OpenAI chat completion response."""
     response = Mock()
     response.choices = [Mock(message=Mock(content=text, role="assistant"))]

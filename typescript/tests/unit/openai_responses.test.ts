@@ -22,7 +22,7 @@ jest.mock('openai', () => {
   // Create a mock Completions class with prototype (needed for compatibility)
   class MockCompletions {
     create(_params: any, _options?: any) {
-      return Promise.resolve({ choices: [], model: 'gpt-4o' });
+      return Promise.resolve({ choices: [], model: 'gpt-5' });
     }
   }
 
@@ -92,7 +92,7 @@ describe('OpenAI Responses API Interceptor', () => {
     const OpenAI = require('openai').default;
     const openai = new OpenAI();
     return await openai.responses.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5',
       input: prompt,
     });
   };

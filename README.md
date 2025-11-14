@@ -1,34 +1,36 @@
 # Agentic Learning SDK
 
-Add persistent memory to any LLM agent with one line of code. This Agentic Learning SDK automatically captures conversations, manages context, and enables agents to remember information across sessions.
+Add continual learning to any LLM agent with one line of code. This SDK enables agents to learn from every conversation and recall context across sessions—making your agents truly stateful.
 
 ```python
+from openai import OpenAI
+from agentic_learning import learning
+
+client = OpenAI()
+
 with learning(agent="my_agent"):
-    response = client.chat.completions.create(...)  # Memory handled automatically
+    response = client.chat.completions.create(...)  # LLM is now stateful!
 ```
 
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![npm shield](https://img.shields.io/npm/v/@letta-ai/agentic-learning)](https://www.npmjs.com/package/@letta-ai/agentic-learning)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 
-## Features
-
-- **🔌 Drop-in Integration** - Works with Anthropic, Claude Agent SDK, OpenAI (Chat Completions & Responses), Gemini, and Vercel AI SDK
-- **💾 Persistent Memory** - Conversations automatically saved and recalled across sessions
-- **🎯 Zero Configuration** - No prompt engineering or manual context management required
-- **⚡ Streaming Support** - Full support for streaming responses
-- **🔍 Memory Search** - Query past conversations with semantic search
-- **🎛️ Flexible Modes** - Auto-inject memory, capture-only, or hybrid approaches
-
 ## Quick Start
 
-### Installation
+### Python Installation
 
 ```bash
 pip install agentic-learning
 ```
 
-### Basic Usage
+### TypeScript Installation
+
+```bash
+npm install @letta-ai/agentic-learning
+```
+
+### Basic Usage (Python)
 
 ```bash
 # Set your API keys
@@ -42,7 +44,7 @@ from agentic_learning import learning
 
 client = OpenAI()
 
-# Add memory to your agent with one line
+# Add continual learning with one line
 with learning(agent="my_assistant"):
     # Your LLM call - conversation is automatically captured
     response = client.chat.completions.create(
@@ -52,28 +54,59 @@ with learning(agent="my_assistant"):
 
     # Agent remembers prior context
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-5",
         messages=[{"role": "user", "content": "What's my name?"}]
     )
     # Returns: "Your name is Alice"
 ```
 
 That's it - this SDK automatically:
-- ✅ Captures all conversations
-- ✅ Injects relevant memory into prompts
-- ✅ Saves to persistent storage (Letta)
-- ✅ Recalls information across sessions
+- ✅ Learns from every conversation
+- ✅ Recalls relevant context when needed
+- ✅ Remembers across sessions
+- ✅ Works with your existing LLM code
+
+### Basic Usage (TypeScript)
+
+```bash
+# Set your API keys
+export OPENAI_API_KEY="your-openai-key"
+export LETTA_API_KEY="your-letta-key"
+```
+
+```typescript
+import { learning } from '@letta-ai/agentic-learning';
+import OpenAI from 'openai';
+
+const client = new OpenAI();
+
+// Add continual learning with one line
+await learning({ agent: "my_assistant" }, async () => {
+    // Your LLM call - conversation is automatically captured
+    const response = await client.chat.completions.create({
+        model: "gpt-5",
+        messages: [{ role: "user", content: "My name is Alice" }]
+    });
+
+    // Agent remembers prior context
+    const response2 = await client.chat.completions.create({
+        model: "gpt-5",
+        messages: [{ role: "user", content: "What's my name?" }]
+    });
+    // Returns: "Your name is Alice"
+});
+```
 
 ## Supported Providers
 
 | Provider | Package | Status | Py Example | TS Example |
 |----------|---------|--------|------------|------------|
 | **Anthropic** | `anthropic` | ✅ Stable | [anthropic_example.py](examples/anthropic_example.py) | [anthropic_example.ts](examples/anthropic_example.ts) |
-| **Claude Agent SDK** | `claude-agent-sdk` | ✅ Stable | [claude_example.py](examples/claude_example.py) | [claude_example.ts](examples/claude_example.ts) |
+| **Claude Agent SDK** | `@anthropic-ai/claude-agent-sdk` | ✅ Stable | [claude_example.py](examples/claude_example.py) | [claude_example.ts](examples/claude_example.ts) |
 | **OpenAI Chat Completions** | `openai` | ✅ Stable | [openai_example.py](examples/openai_example.py) | [openai_example.ts](examples/openai_example.ts) |
 | **OpenAI Responses API** | `openai` | ✅ Stable | [openai_responses_example.py](examples/openai_responses_example.py) | [openai_responses_example.ts](examples/openai_responses_example.ts) |
 | **Gemini** | `google-generativeai` | ✅ Stable | [gemini_example.py](examples/gemini_example.py) | [gemini_example.ts](examples/gemini_example.ts) |
-| **Vercel AI SDK** | `ai-sdk` | 🛠️ Experimental | | [vercel_example.ts](examples/vercel_example.ts) |
+| **Vercel AI SDK** | `ai` | ✅ Stable | N/A (TS only) | [vercel_example.ts](examples/vercel_example.ts) |
 
 See [examples/README.md](examples/README.md) for detailed documentation.
 
@@ -81,19 +114,19 @@ See [examples/README.md](examples/README.md) for detailed documentation.
 
 ### Learning Context
 
-Wrap any LLM calls in a `learning()` context to enable conversation capture and dynamic memory:
+Wrap any LLM calls in a `learning()` context to enable continual learning:
 
 ```python
 with learning(agent="agent_name"):
-    # All SDK calls inside this block have memory enabled
+    # All SDK calls inside this block have learning enabled
     response = llm_client.generate(...)
 ```
 
-**Note:** Memory is scoped by agent name. Each agent maintains its own isolated memory, so `agent="sales_bot"` and `agent="support_bot"` have separate conversation histories and context.
+**Note:** Learning is scoped by agent name. Each agent learns independently, so `agent="sales_bot"` and `agent="support_bot"` maintain separate memories.
 
-### Memory Injection
+### Context Injection
 
-The SDK automatically retrieves relevant memory and injects it into your prompts:
+The SDK automatically retrieves relevant context from past conversations:
 
 ```python
 # First session
@@ -112,11 +145,11 @@ with learning(agent="sales_bot", memory=["customer"]):
 
 ### Capture-Only Mode
 
-Store conversations without injecting memory (useful for logging or background processing):
+Store conversations without injecting context (useful for logging or background processing):
 
 ```python
 with learning(agent="agent_name", capture_only=True):
-    # Conversations saved but not injected into prompts
+    # Conversations saved for learning but not injected into prompts
     response = client.chat.completions.create(...)
 
 # Later, list entire conversation history
@@ -124,9 +157,9 @@ learning_client = AgenticLearning()
 messages = learning_client.messages.list("agent_name")
 ```
 
-### Memory Search
+### Knowledge Search
 
-Query past conversations with semantic search:
+Query what your agent has learned with semantic search:
 
 ```python
 # Search for relevant conversations
@@ -140,10 +173,10 @@ messages = learning_client.memory.search(
 
 The SDK uses **automatic interception** of LLM SDK calls:
 
-1. **Intercepts** - Patches LLM SDK methods to capture conversations
-2. **Enriches** - Retrieves relevant memory and injects into prompts
-3. **Stores** - Saves conversations to Letta for persistent storage
-4. **Recalls** - Automatically loads relevant context in future sessions
+1. **Intercepts** - Captures conversations automatically
+2. **Learns** - Extracts and stores knowledge from interactions
+3. **Recalls** - Retrieves relevant context when needed
+4. **Injects** - Seamlessly adds context to your prompts
 
 ```
 ┌─────────────────-┐
@@ -154,7 +187,7 @@ The SDK uses **automatic interception** of LLM SDK calls:
          ▼
 ┌─────────────────-┐
 │ Agentic Learning │  ← Intercepts call
-│   Interceptor    │  ← Injects memory
+│   Interceptor    │  ← Injects context
 └────────┬───────-─┘
          │
          ▼
@@ -166,7 +199,7 @@ The SDK uses **automatic interception** of LLM SDK calls:
          ▼
 ┌────────────────-─┐
 │   Letta Server   │  ← Stores conversation
-│  (Persistent DB) │  ← Memory update
+│  (Persistent DB) │  ← Learning update
 └─────────────────-┘
 ```
 
@@ -209,13 +242,24 @@ AgenticLearning()
 
 ## Requirements
 
+### Python
 - Python 3.9+
 - Letta API key (sign up at [letta.com](https://www.letta.com/))
 - At least one LLM SDK:
   - `openai>=1.0.0`
   - `anthropic>=0.18.0`
   - `google-generativeai>=0.3.0`
-  - `claude-agent-sdk>=0.1.0`
+  - `@anthropic-ai/claude-agent-sdk>=0.1.0`
+
+### TypeScript/JavaScript
+- Node.js 18+
+- Letta API key (sign up at [letta.com](https://www.letta.com/))
+- At least one LLM SDK:
+  - `openai>=4.0.0`
+  - `@anthropic-ai/sdk>=0.30.0`
+  - `@google/generative-ai>=0.21.0`
+  - `@anthropic-ai/claude-agent-sdk>=0.1.0`
+  - `ai>=3.0.0` (Vercel AI SDK)
 
 ### Local Development (Optional)
 
@@ -233,6 +277,8 @@ See [Letta documentation](https://docs.letta.com/) for more details.
 
 ## Development Setup
 
+### Python Development
+
 ```bash
 # Clone repository
 git clone https://github.com/letta-ai/agentic_learning_sdk.git
@@ -241,9 +287,34 @@ cd agentic_learning_sdk
 # Install in development mode
 pip install -e python/
 
+# Run tests
+cd python
+.venv/bin/python3 -m pytest tests/ -v
+
 # Run examples
-cd examples
+cd ../examples
 python3 openai_example.py
+```
+
+### TypeScript Development
+
+```bash
+# Clone repository
+git clone https://github.com/letta-ai/agentic_learning_sdk.git
+cd agentic_learning_sdk/typescript
+
+# Install dependencies
+npm install
+
+# Build
+npm run build
+
+# Run tests
+npm test
+
+# Run examples
+cd ../examples
+npx tsx openai_example.ts
 ```
 
 ## Advanced Usage
@@ -282,6 +353,28 @@ async_client = AsyncAgenticLearning()
 async with learning_async(agent="my_agent", client=async_client):
     response = await async_llm_client.generate(...)
 ```
+
+## Testing
+
+This SDK includes comprehensive test suites for both Python and TypeScript:
+
+### Python Tests
+- **36/36 tests passing (100%)**
+- Unit tests with mocked LLM HTTP calls
+- Integration tests with real API calls
+- See [python/tests/README.md](python/tests/README.md) for details
+
+### TypeScript Tests
+- **40/40 tests passing (100%)**
+- Unit tests with Jest mocks
+- Integration tests with real API calls
+- See [typescript/tests/README.md](typescript/tests/README.md) for details
+
+Both test suites cover all supported providers and validate:
+- ✅ Conversation capture and storage
+- ✅ Memory injection into prompts
+- ✅ Capture-only mode
+- ✅ Interceptor cleanup
 
 ## Contributing
 

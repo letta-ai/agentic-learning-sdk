@@ -181,7 +181,7 @@ export class OpenAIInterceptor extends BaseAPIInterceptor {
     // Check if streaming
     if (params.stream) {
       // Handle streaming response - wrap to accumulate chunks
-      const wrappedStream = this.wrapStreamingResponse(response, userMessage, params.model || 'gpt-4o');
+      const wrappedStream = this.wrapStreamingResponse(response, userMessage, params.model || 'gpt-5');
       return wrappedStream;
     } else {
       // Non-streaming - extract and save immediately
@@ -300,7 +300,7 @@ export class OpenAIInterceptor extends BaseAPIInterceptor {
     if (response?.model) {
       return response.model;
     }
-    return 'gpt-4o'; // Fallback default
+    return 'gpt-5'; // Fallback default
   }
 
   /**
@@ -369,7 +369,7 @@ export class OpenAIInterceptor extends BaseAPIInterceptor {
           },
         },
       ],
-      model: chunks[0]?.model || 'gpt-4o',
+      model: chunks[0]?.model || 'gpt-5',
     };
   }
 

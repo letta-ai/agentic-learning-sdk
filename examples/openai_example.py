@@ -25,7 +25,7 @@ def ask_gpt(message: str):
     # That's it - wrap your API calls to enable persistent memory
     with learning(agent="openai-demo"):
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-5",
             messages=[{"role": "user", "content": message}]
         )
         print(f"Assistant: {response.choices[0].message.content}\n")

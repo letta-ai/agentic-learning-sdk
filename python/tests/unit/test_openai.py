@@ -26,7 +26,7 @@ class TestOpenAIUnit:
         """Mock OpenAI response."""
         response = Mock()
         response.choices = [Mock(message=Mock(content="Mock response", role="assistant"))]
-        response.model = "gpt-4o"
+        response.model = "gpt-5"
         return response
 
     @pytest.fixture
@@ -51,7 +51,7 @@ class TestOpenAIUnit:
         """Function to make OpenAI chat completion calls."""
         def _make_call(prompt: str):
             response = openai_client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-5",
                 messages=[{"role": "user", "content": prompt}],
             )
             return response

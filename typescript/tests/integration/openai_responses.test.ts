@@ -43,7 +43,7 @@ describe('OpenAI Responses API Integration', () => {
   // Helper to make OpenAI Responses call
   const makeCall = async (prompt: string) => {
     return await openai.responses.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5',
       input: prompt,
     });
   };

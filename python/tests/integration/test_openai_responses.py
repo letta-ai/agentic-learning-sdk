@@ -32,7 +32,7 @@ class TestOpenAIResponsesIntegration:
 
         def _make_call(prompt: str):
             response = openai_client.responses.create(
-                model="gpt-4o-mini",
+                model="gpt-5",
                 input=prompt,
             )
             return response

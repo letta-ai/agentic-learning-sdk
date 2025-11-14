@@ -269,7 +269,7 @@ Test suite runtimes:
 
 Optimization options:
 - **Unit tests**: Use local Letta server (`LETTA_ENV=local`) or reduce sleep times
-- **Integration tests**: Use cheaper models (gpt-4o-mini, claude-3-5-haiku, etc.) - already configured
+- **Integration tests**: Use cheaper models (gpt-5, claude-3-5-haiku, etc.) - already configured
 - Run specific provider/suite tests only
 - Use pytest-xdist for parallel execution: `.venv/bin/python3 -m pytest tests/ -n auto`
 

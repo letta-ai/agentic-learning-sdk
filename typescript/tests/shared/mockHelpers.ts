@@ -7,7 +7,7 @@
 /**
  * Create OpenAI mock response
  */
-export function createOpenAIMockResponse(text = 'Mock response', model = 'gpt-4o') {
+export function createOpenAIMockResponse(text = 'Mock response', model = 'gpt-5') {
   return {
     choices: [
       {
@@ -24,7 +24,7 @@ export function createOpenAIMockResponse(text = 'Mock response', model = 'gpt-4o
 /**
  * Create OpenAI Responses API mock response
  */
-export function createOpenAIResponsesMockResponse(text = 'Mock response', model = 'gpt-4o-mini') {
+export function createOpenAIResponsesMockResponse(text = 'Mock response', model = 'gpt-5') {
   return {
     output: text,
     model,

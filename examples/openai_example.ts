@@ -24,7 +24,7 @@ async function askGPT(message: string) {
   // That's it - wrap your API calls to enable persistent memory
   await learning({ agent: 'openai-demo' }, async () => {
     const response = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [{ role: "user", content: message }],
     });
 

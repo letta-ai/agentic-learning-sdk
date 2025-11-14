@@ -32,7 +32,7 @@ class TestOpenAIIntegration:
 
         def _make_call(prompt: str):
             response = openai_client.chat.completions.create(
-                model="gpt-4o-mini",  # Use cheaper model for testing
+                model="gpt-5",  # Use cheaper model for testing
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=50,  # Limit tokens to reduce cost
             )

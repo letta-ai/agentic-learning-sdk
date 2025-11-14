@@ -424,7 +424,7 @@ Test suite runtimes:
 
 Optimization options:
 - **Unit tests**: Use local Letta server (`LETTA_ENV=local`) or reduce sleep times
-- **Integration tests**: Use cheaper models (already configured: gpt-4o-mini, claude-3-5-haiku, etc.)
+- **Integration tests**: Use cheaper models (already configured: gpt-5, claude-3-5-haiku, etc.)
 
 ## Contributing
 
