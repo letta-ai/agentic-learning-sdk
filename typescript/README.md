@@ -1,4 +1,4 @@
-# Agentic Learning SDK (TypeScript)
+# Agentic Learning SDK
 
 Add continual learning to any LLM agent with one line of code. This SDK enables agents to learn from every conversation and recall context across sessions—making your agents truly stateful.
 
@@ -39,7 +39,7 @@ const client = new OpenAI();
 
 // Add continual learning with one line
 await learning({ agent: "my_assistant" }, async () => {
-    // Your LLM call - conversation is automatically captured
+    // All LLM calls inside this block have learning enabled
     const response = await client.chat.completions.create({
         model: "gpt-5",
         messages: [{ role: "user", content: "My name is Alice" }]
@@ -71,6 +71,17 @@ That's it - this SDK automatically:
 | **Gemini** | `@google/generative-ai>=0.21.0` | ✅ Stable | [gemini_example.ts](../examples/gemini_example.ts) |
 | **Vercel AI SDK** | `ai>=3.0.0` | ✅ Stable | [vercel_example.ts](../examples/vercel_example.ts) |
 
+[Create an issue](https://github.com/letta-ai/agentic-learning-sdk/issues) to request support for another provider, or contribute a PR.
+
+## How It Works
+
+This SDK adds **stateful memory** to your existing LLM code without requiring you to change your application architecture. Simply wrap your LLM calls in a `learning()` context:
+
+- **No code changes required** - Works with your existing LLM Provider SDK code
+- **Automatic memory injection** - Relevant context is retrieved and added to prompts
+- **Persistent across sessions** - Agents remember conversations even after restarts
+- **Powered by Letta** - Production-grade memory management and retrieval
+
 ## Key Features
 
 ### Memory Across Sessions
@@ -91,24 +102,34 @@ await learning({ agent: "sales_bot" }, async () => {
 });
 ```
 
-### Capture-Only Mode
-```typescript
-// Store conversations without injecting memory
-await learning({ agent: "my_agent", captureOnly: true }, async () => {
-    const response = await client.chat.completions.create(...);
-});
-```
-
-### Knowledge Search
+### Search Agent Memory
 ```typescript
 import { AgenticLearning } from '@letta-ai/agentic-learning';
 
 const learningClient = new AgenticLearning();
 
-// Search agent's memory
+// Search past conversations
 const messages = await learningClient.memory.search({
     agent: "my_agent",
     query: "What are my project requirements?"
+});
+```
+
+## Advanced Features
+
+### Capture-Only Mode
+```typescript
+// Store conversations without injecting memory (useful for logging)
+await learning({ agent: "my_agent", captureOnly: true }, async () => {
+    const response = await client.chat.completions.create(...);
+});
+```
+
+### Custom Memory Blocks
+```typescript
+// Configure which memory blocks to use
+await learning({ agent: "sales_bot", memory: ["customer", "product_preferences"] }, async () => {
+    const response = await client.chat.completions.create(...);
 });
 ```
 

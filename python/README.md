@@ -1,4 +1,4 @@
-# Agentic Learning SDK (Python)
+# Agentic Learning SDK
 
 Add continual learning to any LLM agent with one line of code. This SDK enables agents to learn from every conversation and recall context across sessions—making your agents truly stateful.
 
@@ -12,7 +12,7 @@ with learning(agent="my_agent"):
     response = client.chat.completions.create(...)  # LLM is now stateful!
 ```
 
-[![PyPI Version](https://img.shields.io/pypi/v/agentic-learning.svg)](https://pypi.org/project/agentic-learning/)
+[![pypi](https://img.shields.io/pypi/v/agentic-learning)](https://pypi.python.org/pypi/agentic-learning)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](../LICENSE)
 [![Tests](https://img.shields.io/badge/tests-36%2F36%20passing-brightgreen)](tests/)
 
@@ -38,7 +38,7 @@ client = OpenAI()
 
 # Add continual learning with one line
 with learning(agent="my_assistant"):
-    # Your LLM call - conversation is automatically captured
+    # All LLM calls inside this block have learning enabled
     response = client.chat.completions.create(
         model="gpt-5",
         messages=[{"role": "user", "content": "My name is Alice"}]
@@ -68,6 +68,17 @@ That's it - this SDK automatically:
 | **Claude Agent SDK** | `@anthropic-ai/claude-agent-sdk>=0.1.0` | ✅ Stable | [claude_example.py](../examples/claude_example.py) |
 | **Gemini** | `google-generativeai>=0.3.0` | ✅ Stable | [gemini_example.py](../examples/gemini_example.py) |
 
+[Create an issue](https://github.com/letta-ai/agentic-learning-sdk/issues) to request support for another provider, or contribute a PR.
+
+## How It Works
+
+This SDK adds **stateful memory** to your existing LLM code without requiring you to change your application architecture. Simply wrap your LLM calls in a `learning()` context:
+
+- **No code changes required** - Works with your existing LLM Provider SDK code
+- **Automatic memory injection** - Relevant context is retrieved and added to prompts
+- **Persistent across sessions** - Agents remember conversations even after restarts
+- **Powered by Letta** - Production-grade memory management and retrieval
+
 ## Key Features
 
 ### Memory Across Sessions
@@ -86,24 +97,33 @@ with learning(agent="sales_bot"):
     # Agent knows you're asking about Product X
 ```
 
-### Capture-Only Mode
-```python
-# Store conversations without injecting memory
-with learning(agent="my_agent", capture_only=True):
-    response = client.chat.completions.create(...)
-```
-
-### Knowledge Search
+### Search Agent Memory
 ```python
 from agentic_learning import AgenticLearning
 
 learning_client = AgenticLearning()
 
-# Search agent's memory
+# Search past conversations
 messages = learning_client.memory.search(
     agent="my_agent",
     query="What are my project requirements?"
 )
+```
+
+## Advanced Features
+
+### Capture-Only Mode
+```python
+# Store conversations without injecting memory (useful for logging)
+with learning(agent="my_agent", capture_only=True):
+    response = client.chat.completions.create(...)
+```
+
+### Custom Memory Blocks
+```python
+# Configure which memory blocks to use
+with learning(agent="sales_bot", memory=["customer", "product_preferences"]):
+    response = client.chat.completions.create(...)
 ```
 
 ## Local Development

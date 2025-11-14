@@ -46,7 +46,7 @@ client = OpenAI()
 
 # Add continual learning with one line
 with learning(agent="my_assistant"):
-    # Your LLM call - conversation is automatically captured
+    # All LLM calls inside this block have learning enabled
     response = client.chat.completions.create(
         model="gpt-5",
         messages=[{"role": "user", "content": "My name is Alice"}]
@@ -82,7 +82,7 @@ const client = new OpenAI();
 
 // Add continual learning with one line
 await learning({ agent: "my_assistant" }, async () => {
-    // Your LLM call - conversation is automatically captured
+    // All LLM calls inside this block have learning enabled
     const response = await client.chat.completions.create({
         model: "gpt-5",
         messages: [{ role: "user", content: "My name is Alice" }]
@@ -108,7 +108,7 @@ await learning({ agent: "my_assistant" }, async () => {
 | **Gemini** | `google-generativeai` | ✅ Stable | [gemini_example.py](examples/gemini_example.py) | [gemini_example.ts](examples/gemini_example.ts) |
 | **Vercel AI SDK** | `ai` | ✅ Stable | N/A (TS only) | [vercel_example.ts](examples/vercel_example.ts) |
 
-See [examples/README.md](examples/README.md) for detailed documentation.
+[Create an issue](https://github.com/letta-ai/agentic-learning-sdk/issues) to request support for another provider, or contribute a PR.
 
 ## Core Concepts
 
@@ -118,7 +118,7 @@ Wrap any LLM calls in a `learning()` context to enable continual learning:
 
 ```python
 with learning(agent="agent_name"):
-    # All SDK calls inside this block have learning enabled
+    # All LLM calls inside this block have learning enabled
     response = llm_client.generate(...)
 ```
 
@@ -171,7 +171,7 @@ messages = learning_client.memory.search(
 
 ## How It Works
 
-The SDK uses **automatic interception** of LLM SDK calls:
+The SDK uses **automatic interception** of LLM API calls:
 
 1. **Intercepts** - Captures conversations automatically
 2. **Learns** - Extracts and stores knowledge from interactions
@@ -265,15 +265,26 @@ AgenticLearning()
 
 For local development, you can run Letta server locally:
 
-```bash
-# Install Letta
-pip install letta
+```python
+from agentic_learning import AgenticLearning, learning
 
-# Start server (default: http://localhost:8283)
-letta server
+# Connect to local server
+learning_client = AgenticLearning(base_url="http://localhost:8283")
+
+with learning(agent="my_agent", client=learning_client):
+    response = client.chat.completions.create(...)
 ```
 
-See [Letta documentation](https://docs.letta.com/) for more details.
+Run Letta locally with Docker:
+```bash
+docker run \
+  -v ~/.letta/.persist/pgdata:/var/lib/postgresql/data \
+  -p 8283:8283 \
+  -e OPENAI_API_KEY="your_key" \
+  letta/letta:latest
+```
+
+See the [self-hosting guide](https://docs.letta.com/guides/selfhosting) for more options.
 
 ## Development Setup
 
