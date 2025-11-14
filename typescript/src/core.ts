@@ -16,7 +16,6 @@ interface LearningConfig {
   client: AgenticLearning;
   captureOnly: boolean;
   memory: string[];
-  model?: string;
   memoryContext?: string | null; // Pre-fetched memory context
 }
 
@@ -65,7 +64,6 @@ export async function learning<T>(
     client?: AgenticLearning;
     captureOnly?: boolean;
     memory?: string[];
-    model?: string;
   },
   fn: () => Promise<T>
 ): Promise<T> {
@@ -103,7 +101,6 @@ export async function learning<T>(
     client: client,
     captureOnly: options.captureOnly || false,
     memory: options.memory || ['human'], // Default to ['human'] like Python SDK
-    model: options.model,
     memoryContext, // Store pre-fetched memory context
   };
 

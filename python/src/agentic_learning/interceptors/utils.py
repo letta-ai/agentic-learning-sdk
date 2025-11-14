@@ -87,7 +87,6 @@ def _save_conversation_turn(
             agent_state = client.agents.create(
                 agent=agent,
                 memory=config["memory"],
-                model=config["model"],
             )
 
         return client.messages.capture(
@@ -129,7 +128,6 @@ async def _save_conversation_turn_async(
     agent = config["agent_name"]
     client = config["client"]
     memory = config.get("memory")
-    model_config = config.get("model")
 
     if not client:
         return
@@ -151,7 +149,6 @@ async def _save_conversation_turn_async(
                     lambda: client.agents.create(
                         agent=agent,
                         memory=memory,
-                        model=model_config,
                     )
                 )
 

@@ -48,7 +48,6 @@ export async function saveConversationTurn(
       agentState = await client.agents.create({
         agent,
         memory: config.memory,
-        model: config.model,
       });
     }
 

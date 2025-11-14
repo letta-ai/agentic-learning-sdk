@@ -56,7 +56,6 @@ class LearningContext:
         client: Optional[Union["AgenticLearning", "AsyncAgenticLearning"]],
         capture_only: bool,
         memory: List[str],
-        model: str
     ):
         """
         Initialize learning context.
@@ -66,13 +65,11 @@ class LearningContext:
             client: AgenticLearning or AsyncAgenticLearning client instance
             capture_only: Whether to skip auto-injecting memory into prompts
             memory: List of Letta memory block labels to configure for the agent
-            model: Optional model to use for Letta agent
         """
         self.agent_name = agent
         self.client = client
         self.capture_only = capture_only
         self.memory = memory
-        self.model = model
         self._token: Optional[Token] = None
 
     def __enter__(self):
@@ -88,7 +85,6 @@ class LearningContext:
             "client": self.client,
             "capture_only": self.capture_only,
             "memory": self.memory,
-            "model": self.model,
             "pending_user_message": None,
             "pending_tasks": [] 
         })
@@ -115,7 +111,6 @@ class LearningContext:
             "client": self.client,
             "capture_only": self.capture_only,
             "memory": self.memory,
-            "model": self.model,
             "pending_user_message": None,
             "pending_tasks": []  
         })
@@ -149,7 +144,6 @@ def learning(
     client: Optional[Union["AgenticLearning", "AsyncAgenticLearning"]] = None,
     capture_only: bool = False,
     memory: List[str] = ["human"],
-    model: str = "anthropic/claude-sonnet-4-20250514",
 ) -> LearningContext:
     """
     Create a learning context for automatic Letta integration.
@@ -169,7 +163,6 @@ def learning(
                 If None, will create appropriate client based on usage (sync vs async).
         capture_only: Whether to capture conversations without automatic Letta memory injection (default: False)
         memory: Optional list of Letta memory blocks to configure for the agent (default: ["human"])
-        model: Optional model to use for Letta agent (default: "anthropic/claude-sonnet-4-20250514")
 
     Returns:
         LearningContext that can be used with both 'with' and 'async with'
@@ -197,5 +190,4 @@ def learning(
         client=client,
         capture_only=capture_only,
         memory=memory,
-        model=model
     )
