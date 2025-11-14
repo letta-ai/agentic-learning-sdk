@@ -4,11 +4,42 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentic-learning"
-version = "0.4.0"
-description = "Drop-in SDK for adding persistent memory and learning to any agent."
+version = "0.4.1"
+description = "Drop-in SDK to add an AI memory layer to any application. Works with OpenAI, Anthropic, Gemini, Claude."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
+keywords = [
+    "ai-memory",
+    "llm-memory",
+    "agent-memory",
+    "persistent-memory",
+    "continual-learning",
+    "ai-agents",
+    "llm",
+    "openai",
+    "anthropic",
+    "claude",
+    "gemini",
+    "letta",
+    "memory-layer",
+    "stateful-agents",
+    "conversational-ai",
+    "rag",
+    "context-management",
+    "semantic-memory"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 authors = [
     {name = "Caren Thomas", email = "caren@letta.com"}
 ]
@@ -41,6 +72,8 @@ dev = [
 Homepage = "https://github.com/letta-ai/agentic-learning-sdk"
 Repository = "https://github.com/letta-ai/agentic-learning-sdk"
 Issues = "https://github.com/letta-ai/agentic-learning-sdk/issues"
+Documentation = "https://github.com/letta-ai/agentic-learning-sdk#readme"
+"Source Code" = "https://github.com/letta-ai/agentic-learning-sdk"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agentic_learning"]

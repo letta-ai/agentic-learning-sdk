@@ -1,4 +1,4 @@
-# Agentic Learning SDK
+# Agentic Learning SDK - AI Memory Layer for Any Application
 
 Add continual learning to any LLM agent with one line of code. This SDK enables agents to learn from every conversation and recall context across sessions—making your agents truly stateful.
 
@@ -9,7 +9,8 @@ import { learning } from '@letta-ai/agentic-learning';
 const client = new OpenAI();
 
 await learning({ agent: 'my_agent' }, async () => {
-    response = await client.chat.completions.create(...) // LLM is now stateful!
+    // LLM is now stateful!
+    response = await client.chat.completions.create(...) 
 });
 ```
 
@@ -75,12 +76,40 @@ That's it - this SDK automatically:
 
 ## How It Works
 
-This SDK adds **stateful memory** to your existing LLM code without requiring you to change your application architecture. Simply wrap your LLM calls in a `learning()` context:
+This SDK adds **stateful memory** to your existing LLM code with zero architectural changes:
 
-- **No code changes required** - Works with your existing LLM Provider SDK code
-- **Automatic memory injection** - Relevant context is retrieved and added to prompts
-- **Persistent across sessions** - Agents remember conversations even after restarts
-- **Powered by Letta** - Production-grade memory management and retrieval
+**Benefits:**
+- 🔌 **Drop-in integration** - Works with your existing LLM Provider SDK code
+- 🧠 **Automatic memory** - Relevant context retrieved and injected into prompts
+- 💾 **Persistent across sessions** - Conversations remembered even after restarts
+- 💰 **Cost-effective** - Only relevant context injected, reducing token usage
+- ⚡ **Fast retrieval** - Semantic search powered by Letta's optimized infrastructure
+- 🏢 **Production-ready** - Built on Letta's proven memory management platform
+
+**Architecture:**
+
+```
+1. 🎯 Wrap      2. 📝 Capture       3. 🔍 Retrieve   4. 🤖 Respond
+   your code       conversations      relevant         with full
+   in learning     automatically      memories         context
+
+┌─────────────┐
+│  Your Code  │
+│  learning() │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐    ┌──────────────┐
+│ Interceptor │───▶│ Letta Server │  (Stores conversations,
+│  (Inject)   │◀───│  (Memory)    │   retrieves context)
+└──────┬──────┘    └──────────────┘
+       │
+       ▼
+┌─────────────┐
+│  LLM API    │  (Sees enriched prompts)
+│ OpenAI/etc  │
+└─────────────┘
+```
 
 ## Key Features
 

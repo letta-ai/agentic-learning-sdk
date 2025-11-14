@@ -1,7 +1,7 @@
 {
   "name": "@letta-ai/agentic-learning",
-  "version": "0.4.0",
-  "description": "Agentic Learning SDK for TypeScript - Automatic memory integration with Letta",
+  "version": "0.4.1",
+  "description": "Drop-in SDK to add an AI memory layer to any application. Works with OpenAI, Anthropic, Gemini, Claude, Vercel AI SDK.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -30,15 +30,28 @@
     "example:claude": "cd ../examples && NODE_PATH=../typescript/node_modules ts-node claude_example.ts"
   },
   "keywords": [
-    "letta",
-    "memory",
-    "learning",
-    "ai",
+    "ai-memory",
+    "llm-memory",
+    "agent-memory",
+    "persistent-memory",
+    "continual-learning",
+    "ai-agents",
     "llm",
     "openai",
     "anthropic",
+    "claude",
     "gemini",
-    "claude"
+    "vercel-ai",
+    "letta",
+    "memory-layer",
+    "stateful-agents",
+    "conversational-ai",
+    "rag",
+    "context-management",
+    "semantic-memory",
+    "long-term-memory",
+    "chatbot-memory",
+    "ai-context"
   ],
   "author": "Caren Thomas",
   "license": "Apache-2.0",
