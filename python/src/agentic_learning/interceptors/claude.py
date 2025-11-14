@@ -134,8 +134,12 @@ class ClaudeInterceptor(BaseInterceptor):
             return
 
         try:
-            # Retrieve memory context (await if async client)
-            memory_context = await client.memory.context.retrieve(agent=agent_name)
+            # Retrieve memory context (run sync client in thread pool)
+            loop = asyncio.get_event_loop()
+            memory_context = await loop.run_in_executor(
+                None,
+                lambda: client.memory.context.retrieve(agent=agent_name)
+            )
 
             if not memory_context:
                 return

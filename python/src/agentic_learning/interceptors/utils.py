@@ -136,22 +136,34 @@ async def _save_conversation_turn_async(
 
     async def save_task():
         try:
-            # Get or create agent using async API
-            agent_state = await client.agents.retrieve(agent=agent)
+            import asyncio
+            loop = asyncio.get_event_loop()
+
+            # Get or create agent using sync client in thread pool
+            agent_state = await loop.run_in_executor(
+                None,
+                lambda: client.agents.retrieve(agent=agent)
+            )
 
             if not agent_state:
-                agent_state = await client.agents.create(
-                    agent=agent,
-                    memory=memory,
-                    model=model_config,
+                agent_state = await loop.run_in_executor(
+                    None,
+                    lambda: client.agents.create(
+                        agent=agent,
+                        memory=memory,
+                        model=model_config,
+                    )
                 )
 
-            return await client.messages.capture(
-                agent=agent,
-                request_messages=request_messages or [],
-                response_dict=response_dict or {},
-                model=model,
-                provider=provider,
+            return await loop.run_in_executor(
+                None,
+                lambda: client.messages.capture(
+                    agent=agent,
+                    request_messages=request_messages or [],
+                    response_dict=response_dict or {},
+                    model=model,
+                    provider=provider,
+                )
             )
 
         except Exception as e:
