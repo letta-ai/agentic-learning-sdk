@@ -68,9 +68,9 @@ class SleeptimeClient:
         sleeptime_agent_id = primary_agent.multi_agent_group.agent_ids[0]
 
         if model:
-            sleeptime_agent = self._letta.agents.modify(agent_id=sleeptime_agent_id, model=model)
+            sleeptime_agent = self._letta.agents.update(agent_id=sleeptime_agent_id, model=model)
         if frequency:
-            self._letta.groups.modify(group_id=primary_agent.multi_agent_group.id, manager_config=SleeptimeManagerParam(sleeptime_agent_frequency=frequency))
+            self._letta.groups.update(group_id=primary_agent.multi_agent_group.id, manager_config=SleeptimeManagerParam(sleeptime_agent_frequency=frequency))
             sleeptime_agent = self._letta.agents.retrieve(
                 agent_id=sleeptime_agent_id,
                 include=["agent.blocks", "agent.managed_group", "agent.tags"],
@@ -139,9 +139,9 @@ class AsyncSleeptimeClient:
         sleeptime_agent_id = primary_agent.multi_agent_group.agent_ids[0]
 
         if model:
-            sleeptime_agent = await self._letta.agents.modify(agent_id=sleeptime_agent_id, model=model)
+            sleeptime_agent = await self._letta.agents.update(agent_id=sleeptime_agent_id, model=model)
         if frequency:
-            await self._letta.groups.modify(group_id=primary_agent.multi_agent_group.id, manager_config=SleeptimeManagerParam(sleeptime_agent_frequency=frequency))
+            await self._letta.groups.update(group_id=primary_agent.multi_agent_group.id, manager_config=SleeptimeManagerParam(sleeptime_agent_frequency=frequency))
             sleeptime_agent = await self._letta.agents.retrieve(
                 agent_id=sleeptime_agent_id,
                 include=["agent.blocks", "agent.managed_group", "agent.tags"],

@@ -69,14 +69,14 @@ export class SleeptimeClient {
 
     // Update model if provided
     if (model) {
-      sleeptimeAgent = await this.letta.agents.modify(sleeptimeAgentId, {
+      sleeptimeAgent = await this.letta.agents.update(sleeptimeAgentId, {
         model,
       });
     }
 
     // Update frequency if provided
     if (frequency) {
-      await this.letta.groups.modify(multiAgentGroup.id, {
+      await this.letta.groups.update(multiAgentGroup.id, {
         managerConfig: {
           managerType: 'sleeptime' as const,
           sleeptimeAgentFrequency: frequency,

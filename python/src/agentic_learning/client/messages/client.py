@@ -135,7 +135,7 @@ class MessagesClient:
         agent_id = self._parent.agents._retrieve_id(agent=agent)
         if not agent_id:
             return None
-        response = self._letta.agents.messages.send(
+        response = self._letta.agents.messages.create(
             agent_id=agent_id,
             messages=messages
         )
@@ -269,7 +269,7 @@ class AsyncMessagesClient:
         agent_id = await self._parent.agents._retrieve_id(agent=agent)
         if not agent_id:
             return None
-        response = await self._letta.agents.messages.send(
+        response = await self._letta.agents.messages.create(
             agent_id=agent_id,
             messages=messages
         )

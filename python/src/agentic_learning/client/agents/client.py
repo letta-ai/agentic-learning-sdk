@@ -61,7 +61,7 @@ class AgentsClient:
             tags=["agentic-learning-sdk"],
             enable_sleeptime=True,
         )
-        self._letta.groups.modify(
+        self._letta.groups.update(
             group_id=agent.multi_agent_group.id,
             manager_config=SleeptimeManagerParam(
                 manager_type="sleeptime",
@@ -204,7 +204,7 @@ class AsyncAgentsClient:
             tags=["agentic-learning-sdk"],
             enable_sleeptime=True,
         )
-        await self._letta.groups.modify(
+        await self._letta.groups.update(
             group_id=agent.multi_agent_group.id,
             manager_config=SleeptimeManagerParam(
                 manager_type="sleeptime",

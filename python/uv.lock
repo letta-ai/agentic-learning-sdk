@@ -53,7 +53,7 @@ requires-dist = [
     { name = "google-generativeai", marker = "extra == 'gemini'", specifier = ">=0.8.0" },
     { name = "httpx", specifier = ">=0.21.2" },
     { name = "httpx-sse", specifier = ">=0.4.0" },
-    { name = "letta-client", specifier = "==1.0.0a18" },
+    { name = "letta-client", specifier = "==1.0.0a20" },
     { name = "openai", marker = "extra == 'all'", specifier = ">=1.102.0" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=1.102.0" },
     { name = "pydantic", specifier = ">=1.9.2" },
@@ -864,7 +864,7 @@ wheels = [
 
 [[package]]
 name = "letta-client"
-version = "1.0.0a18"
+version = "1.0.0a20"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -874,9 +874,9 @@ dependencies = [
     { name = "sniffio" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/63/bc/bacc647c1b5bdba4d44d61b84cb334774616931d67093bd24459155132d5/letta_client-1.0.0a18.tar.gz", hash = "sha256:4c4c1e8db7c04c2593e864f9a209bdd765c6a1bb1c2162221b9ee6c097687b3a", size = 227640, upload-time = "2025-11-10T21:53:47.61Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/32/ada7d968ee14e58d833fc6149b0d4016c5682655ee88c309fc82eecf367b/letta_client-1.0.0a20.tar.gz", hash = "sha256:43a229528d5d8efc3bc105e4e06ba84c7d8da2ae824f6730108bdf63b7c5be50", size = 234625, upload-time = "2025-11-12T23:05:36.999Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0f/f2/39b2a2b3396c69901176d5b570bbd93fdacb40eb39102f1f9d60c6b0232f/letta_client-1.0.0a18-py3-none-any.whl", hash = "sha256:4c9513cef671c6cf5a21cfbba9f706f27cf16730d1b6ee9fe619de4dde17b880", size = 334563, upload-time = "2025-11-10T21:53:45.673Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/70/da2ebe9c7579d9d6bc0c1d14d3feac8e9435256368d2474629f630d8d89d/letta_client-1.0.0a20-py3-none-any.whl", hash = "sha256:db994e90b27c12b0ebf24e2aed6ee9e40e3834eb7c8cd3ad0b0810be3c43353b", size = 355940, upload-time = "2025-11-12T23:05:34.987Z" },
 ]
 
 [[package]]

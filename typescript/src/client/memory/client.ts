@@ -86,7 +86,7 @@ export class MemoryClient {
     if (!existingBlock) {
       return await this.create(options);
     } else {
-      const updatedBlock = await this.parent.letta.blocks.modify(existingBlock.id, {
+      const updatedBlock = await this.parent.letta.blocks.update(existingBlock.id, {
         value: options.value,
         description: options.description,
       });
@@ -170,7 +170,7 @@ export class MemoryClient {
     }
 
     try {
-      const response = await this.parent.letta.agents.messages.send(sleeptimeAgent.id, {
+      const response = await this.parent.letta.agents.messages.create(sleeptimeAgent.id, {
         messages: [
           {
             role: 'user',
@@ -199,7 +199,7 @@ export class MemoryClient {
       return null;
     }
 
-    await this.parent.letta.agents.messages.send(sleeptimeAgent.id, {
+    await this.parent.letta.agents.messages.create(sleeptimeAgent.id, {
       messages: [
         {
           role: 'user',

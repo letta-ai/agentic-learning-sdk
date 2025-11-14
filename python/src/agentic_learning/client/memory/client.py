@@ -98,10 +98,10 @@ class MemoryClient:
             )
         else:
             block = block[0]
-            block = self._letta.blocks.modify(
-                block_id=block.id,  
+            block = self._letta.blocks.update(
+                block_id=block.id,
                 value=value or memory_placeholder(label),
-                description=description,   
+                description=description,
             )
         
         return block
@@ -180,7 +180,7 @@ class MemoryClient:
         if not sleeptime_agent:
             return []
 
-        response = self._letta.agents.messages.send(
+        response = self._letta.agents.messages.create(
             agent_id=sleeptime_agent.id,
             messages=[{
                 "role": "user",
@@ -205,7 +205,7 @@ class MemoryClient:
         if not sleeptime_agent:
             return []
 
-        self._letta.agents.messages.send(
+        self._letta.agents.messages.create(
             agent_id=sleeptime_agent.id,
             messages=[{
                 "role": "user",
@@ -301,10 +301,10 @@ class AsyncMemoryClient:
             )
         else:
             block = block[0]
-            block = await self._letta.blocks.modify(
-                block_id=block.id,  
+            block = await self._letta.blocks.update(
+                block_id=block.id,
                 value=value or memory_placeholder(label),
-                description=description,   
+                description=description,
             )
         
         return block

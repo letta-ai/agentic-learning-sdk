@@ -10,7 +10,7 @@ import { MessagesContextClient } from './context';
 import type { Provider } from '../../types';
 
 // Use the Letta SDK's message type directly
-export type Message = Agents.LettaMessageUnion;
+export type Message = Agents.Message;
 
 export interface ListMessagesOptions {
   before?: string;
@@ -122,7 +122,7 @@ export class MessagesClient {
       return [];
     }
 
-    const response = await this.parent.letta.agents.messages.send(agentState.id, {
+    const response = await this.parent.letta.agents.messages.create(agentState.id, {
       messages: messages as any,
     });
 

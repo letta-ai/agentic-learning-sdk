@@ -78,7 +78,7 @@ export class AgentsClient {
     // Configure sleeptime manager
     if (agent.multi_agent_group?.id) {
       try {
-        await this.parent.letta.groups.modify(agent.multi_agent_group.id, {
+        await this.parent.letta.groups.update(agent.multi_agent_group.id, {
           manager_config: {
             manager_type: 'sleeptime' as const,
             sleeptime_agent_frequency: 2,
@@ -105,7 +105,7 @@ export class AgentsClient {
       return null;
     }
 
-    const updatedAgent = await this.parent.letta.agents.modify(agentId, {
+    const updatedAgent = await this.parent.letta.agents.update(agentId, {
       model,
     });
 
